@@ -1,0 +1,28 @@
+{
+  "name": "panda-farki-bul",
+  "version": "1.0.0",
+  "description": "Panda Farkı Bul! – 2-5 yaş için 50 seviyeli fark bulma oyunu (Panda Games Studio)",
+  "private": true,
+  "license": "UNLICENSED",
+  "author": "Panda Games Studio",
+  "scripts": {
+    "android:add": "npx cap add android",
+    "assets": "npx --yes @capacitor/assets@3 generate --android --iconBackgroundColor \"#9FD8E6\" --iconBackgroundColorDark \"#9FD8E6\" --splashBackgroundColor \"#BFE8F7\" --splashBackgroundColorDark \"#BFE8F7\"",
+    "cap-patch": "node scripts/patch-android.js",
+    "sync": "npx cap sync android",
+    "android:prepare": "npm run android:add && npm run assets && npm run cap-patch && npm run sync",
+    "android:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor-community/text-to-speech": "^6.0.0",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

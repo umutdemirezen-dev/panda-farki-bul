@@ -1,0 +1,2398 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#bfe8f7">
+<title>Panda Farkı Bul! - Panda Games Studio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+html,body{width:100%;height:100%;overflow:hidden;font-family:"Baloo 2","Fredoka","Nunito","Trebuchet MS","Segoe UI",Arial,sans-serif;background:#bfe8f7;color:#3a2c1c}
+:root{--u:min(1vh,0.56vw);--s:min(70vh,41vw)}
+button{font-family:inherit;border:none;cursor:pointer}
+.screen{position:fixed;inset:0;display:none}
+.screen.active{display:block}
+
+/* ---------- Background ---------- */
+.bg{position:absolute;inset:0;overflow:hidden;background:repeating-linear-gradient(90deg,#cdeffb 0 9vw,#bfe8f7 9vw 18vw)}
+.bg:before{content:"";position:absolute;left:-10%;right:-10%;bottom:-30%;height:55%;border-radius:50% 50% 0 0;background:#bfe9b4;opacity:.85}
+.bg:after{content:"";position:absolute;left:30%;right:-20%;bottom:-36%;height:50%;border-radius:50% 50% 0 0;background:#a9e09c;opacity:.8}
+
+/* ---------- Buttons ---------- */
+.rbtn{width:calc(var(--u)*11);height:calc(var(--u)*11);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;
+ background:linear-gradient(#ff7a5c,#f2452b);box-shadow:0 calc(var(--u)*.9) 0 #b52a14,0 calc(var(--u)*1.6) calc(var(--u)*2) rgba(0,0,0,.2);border:calc(var(--u)*.7) solid #fff;transition:transform .08s;color:#fff;font-weight:900}
+.rbtn:active{transform:translateY(calc(var(--u)*.7))}
+.rbtn svg{width:58%;height:58%}
+.rbtn.orange{background:linear-gradient(#ffb04d,#ff8a1e);box-shadow:0 calc(var(--u)*.9) 0 #c95f00,0 calc(var(--u)*1.6) calc(var(--u)*2) rgba(0,0,0,.2)}
+.rbtn.green{background:linear-gradient(#7ee05d,#3fb52c);box-shadow:0 calc(var(--u)*.9) 0 #2c7d1b,0 calc(var(--u)*1.6) calc(var(--u)*2) rgba(0,0,0,.2)}
+.rbtn.big{width:calc(var(--u)*15);height:calc(var(--u)*15)}
+.rbtn.off{filter:grayscale(.9) brightness(1.05)}
+.rbtn .lbl{font-size:calc(var(--u)*2.4);line-height:1;margin-top:calc(var(--u)*-.3);text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.rbtn.withlbl svg{width:48%;height:48%}
+
+/* ---------- Splash (Panda Games Studio standard) ---------- */
+#splash{background:radial-gradient(ellipse at 50% 40%,#d6f1fd 0%,#b9e6fa 45%,#9fdcf7 100%);z-index:50}
+#splash .wrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#splash .logoBox{width:calc(var(--u)*62);height:calc(var(--u)*46);animation:pop 1s cubic-bezier(.2,1.6,.4,1) both}
+#splash .logo{width:100%;height:100%;overflow:visible}
+#splash .head{transform-origin:150px 190px;animation:sway 2.2s 1s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+#splash .spark{transform-box:fill-box;transform-origin:center;animation:twinkle 1.6s ease-in-out infinite}
+#splash .spark:nth-of-type(2){animation-delay:.4s}#splash .spark:nth-of-type(3){animation-delay:.8s}#splash .spark:nth-of-type(4){animation-delay:1.2s}
+@keyframes twinkle{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.55);opacity:.55}}
+#splash .brand{margin-top:calc(var(--u)*4);font-family:"Roboto","Arial Black","Segoe UI",Arial,sans-serif;font-size:calc(var(--u)*8.5);font-weight:900;color:#fff;letter-spacing:.01em;
+ -webkit-text-stroke:calc(var(--u)*1.1) #3d2f7c;paint-order:stroke fill;text-shadow:0 calc(var(--u)*.7) 0 #3d2f7c;animation:rise .8s .5s both;white-space:nowrap}
+@keyframes pop{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes rise{0%{opacity:0;transform:translateY(30px)}100%{opacity:1;transform:none}}
+#splash .blink{animation:blink 3s 1.2s infinite}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+
+/* ---------- Title ---------- */
+.title{font-weight:900;letter-spacing:.02em;text-align:center;line-height:1;white-space:nowrap;
+ -webkit-text-stroke:calc(var(--u)*.6) #fff;paint-order:stroke fill;text-shadow:0 calc(var(--u)*.6) 0 rgba(0,0,0,.18)}
+.title .r{color:#ff4d6d}.title .g{color:#3fb34f}.title .p{color:#9b51e0}.title .o{color:#ff8a1e}.title .b{color:#2f8cff}
+
+/* ---------- Menu ---------- */
+#menu .content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*3)}
+#menu .title{font-size:calc(var(--u)*13)}
+#menu .tag{font-size:calc(var(--u)*4.2);font-weight:800;color:#6b4f2a;background:rgba(255,255,255,.8);padding:calc(var(--u)*.8) calc(var(--u)*3);border-radius:99px;margin-top:calc(var(--u)*-1)}
+.mbtn{min-width:calc(var(--u)*62);padding:calc(var(--u)*2.4) calc(var(--u)*5);border-radius:calc(var(--u)*5);font-size:calc(var(--u)*6);font-weight:900;color:#fff;
+ border:calc(var(--u)*.7) solid #fff;display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*2);text-shadow:0 calc(var(--u)*.4) 0 rgba(0,0,0,.2);transition:transform .08s}
+.mbtn:active{transform:translateY(calc(var(--u)*.8)) scale(.98)}
+.mbtn.play{background:linear-gradient(#7ee05d,#3fb52c);box-shadow:0 calc(var(--u)*1.2) 0 #2c7d1b,0 calc(var(--u)*2) calc(var(--u)*3) rgba(0,0,0,.2);font-size:calc(var(--u)*7.5);animation:breath 1.8s ease-in-out infinite}
+.mbtn.lvls{background:linear-gradient(#5fb6ff,#2f86f0);box-shadow:0 calc(var(--u)*1.2) 0 #1b5fb5,0 calc(var(--u)*2) calc(var(--u)*3) rgba(0,0,0,.2)}
+.mbtn.priv{background:linear-gradient(#c89cff,#9b51e0);box-shadow:0 calc(var(--u)*1.2) 0 #6a2fb0,0 calc(var(--u)*2) calc(var(--u)*3) rgba(0,0,0,.2);font-size:calc(var(--u)*4.6);min-width:calc(var(--u)*50);padding:calc(var(--u)*1.6) calc(var(--u)*4)}
+.mbtn small{font-size:.55em;opacity:.95}
+@keyframes breath{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+#menu .corner{position:absolute;top:calc(var(--u)*3);right:calc(var(--u)*3);display:flex;gap:calc(var(--u)*2)}
+.pill{position:absolute;padding:calc(var(--u)*1.4) calc(var(--u)*3);border-radius:99px;background:rgba(255,255,255,.85);font-size:calc(var(--u)*3.2);font-weight:800;color:#6b4f2a}
+#menu .mascot{position:absolute;left:3%;bottom:8%;width:calc(var(--u)*34);animation:bob 2.4s ease-in-out infinite}
+#menu .mascot2{position:absolute;right:4%;bottom:12%;width:calc(var(--u)*30);animation:bob 2.4s 1.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-4%) rotate(3deg)}}
+.studio{position:absolute;bottom:calc(var(--u)*3);right:calc(var(--u)*3);font-size:calc(var(--u)*3);font-weight:800;color:#5b7a3d;opacity:.85}
+
+/* ---------- Levels ---------- */
+#levels .top{position:absolute;top:calc(var(--u)*3);left:calc(var(--u)*3);right:calc(var(--u)*3);display:flex;align-items:center;justify-content:space-between}
+#levels .title{font-size:calc(var(--u)*8)}
+#levels .gridwrap{position:absolute;top:calc(var(--u)*18);bottom:calc(var(--u)*3);left:6%;right:6%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(var(--u)*2)}
+#levels .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:calc(var(--u)*2.6)}
+.lv{aspect-ratio:1;border-radius:calc(var(--u)*3);font-size:calc(var(--u)*6);font-weight:900;color:#fff;position:relative;
+ background:linear-gradient(#ffcf4a,#ffad1f);border:calc(var(--u)*.6) solid #fff;box-shadow:0 calc(var(--u)*.9) 0 #d17f00;text-shadow:0 calc(var(--u)*.3) 0 rgba(0,0,0,.2)}
+.lv:active{transform:translateY(calc(var(--u)*.6))}
+.lv.done{background:linear-gradient(#7ee05d,#3fb52c);box-shadow:0 calc(var(--u)*.9) 0 #2c7d1b}
+.lv.cur{animation:breath 1.4s infinite}
+.lv.lock{background:linear-gradient(#c9b8a3,#a8957d);box-shadow:0 calc(var(--u)*.9) 0 #7c6a54;color:rgba(255,255,255,.75)}
+.lv.pay{background:linear-gradient(#ffe08a,#ffc84a);box-shadow:0 calc(var(--u)*.9) 0 #d19a10}
+.lv .star{position:absolute;top:-18%;right:-14%;width:45%}
+.lv .lk{position:absolute;bottom:-12%;right:-12%;width:48%}
+.lv.shake{animation:lvshake .45s}
+@keyframes lvshake{0%,100%{transform:none}20%{transform:translateX(-12%) rotate(-6deg)}40%{transform:translateX(10%) rotate(5deg)}60%{transform:translateX(-7%) rotate(-3deg)}80%{transform:translateX(4%)}}
+
+/* ---------- Game ---------- */
+#game .hdr{position:absolute;top:calc(var(--u)*2.2);left:calc(var(--u)*3);right:calc(var(--u)*3);display:flex;align-items:center;justify-content:space-between;z-index:3}
+#game .hdr .title{font-size:calc(var(--u)*9.5);position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--u)*.5)}
+#game .hdr .grp{display:flex;gap:calc(var(--u)*2)}
+.info{position:absolute;top:calc(var(--u)*13.2);left:50%;transform:translateX(-50%);width:calc(var(--s)*2 + var(--u)*5);display:flex;justify-content:space-between;align-items:center;z-index:3;
+ font-weight:900;font-size:calc(var(--u)*4.2);color:#2b2140;padding:0 calc(var(--u)*2)}
+.info .lname{flex:1;min-width:0;text-align:center;padding-left:calc(var(--u)*12);padding-right:calc(var(--u)*2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info .cnt{background:#fff;border-radius:99px;padding:calc(var(--u)*.4) calc(var(--u)*3);box-shadow:0 calc(var(--u)*.6) 0 rgba(0,0,0,.12);white-space:nowrap}
+.info .cnt b{color:#f2452b}
+.cnt.bump{animation:bump .45s}
+@keyframes bump{40%{transform:scale(1.25)}}
+.frames{position:absolute;top:calc(var(--u)*19.5);left:50%;transform:translateX(-50%);display:flex;gap:calc(var(--u)*5);z-index:2}
+.frame{width:var(--s);height:var(--s);background:#fff;border-radius:calc(var(--u)*4);padding:calc(var(--u)*1.5);box-shadow:0 calc(var(--u)*1.2) calc(var(--u)*3) rgba(0,0,0,.2),0 0 0 calc(var(--u)*.5) rgba(0,0,0,.06);position:relative}
+.frame svg{width:100%;height:100%;display:block;border-radius:calc(var(--u)*2.6);cursor:pointer}
+.frame.solved{animation:glow 1.2s ease-in-out 2}
+@keyframes glow{50%{box-shadow:0 0 0 calc(var(--u)*1.2) #ffd93b,0 calc(var(--u)*1.2) calc(var(--u)*3) rgba(0,0,0,.2)}}
+.mark{transform-box:fill-box;transform-origin:center;animation:markpop .5s cubic-bezier(.2,1.7,.4,1) both}
+@keyframes markpop{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+.miss{transform-box:fill-box;transform-origin:center;animation:missfade .6s ease-out forwards}
+@keyframes missfade{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1.4);opacity:0}}
+.hintc{transform-box:fill-box;transform-origin:center;animation:hintp .7s ease-in-out 3}
+@keyframes hintp{0%,100%{transform:scale(.85);opacity:.4}50%{transform:scale(1.08);opacity:1}}
+.sideL{position:absolute;left:calc(var(--u)*3);bottom:calc(var(--u)*4);z-index:3}
+.sideR{position:absolute;right:calc(var(--u)*3);bottom:calc(var(--u)*4);z-index:3;display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*3)}
+#btnNext{filter:grayscale(1) brightness(1.1);opacity:.55;transition:filter .3s,opacity .3s}
+#btnNext.ready{filter:none;opacity:1;animation:breath 1s infinite}
+#btnNext.nudge{animation:lvshake .45s}
+.bubble{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0);background:#fff;border-radius:calc(var(--u)*4);padding:calc(var(--u)*2) calc(var(--u)*5);font-size:calc(var(--u)*7);font-weight:900;color:#ff8a1e;
+ box-shadow:0 calc(var(--u)*1) calc(var(--u)*3) rgba(0,0,0,.25);z-index:8;pointer-events:none;transition:transform .3s cubic-bezier(.2,1.6,.4,1);white-space:nowrap;border:calc(var(--u)*.8) solid #ffd93b}
+.bubble.small{font-size:calc(var(--u)*4.6)}
+.bubble.show{transform:translate(-50%,-50%) scale(1)}
+.fly{position:fixed;pointer-events:none;z-index:31;width:calc(var(--u)*7);height:calc(var(--u)*7);will-change:transform,opacity}
+
+/* ---------- Overlays ---------- */
+.ov{position:fixed;inset:0;background:rgba(40,25,10,.45);display:none;align-items:center;justify-content:center;z-index:20}
+.ov.show{display:flex;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.card{background:#fffaf0;border-radius:calc(var(--u)*5);border:calc(var(--u)*1) solid #fff;box-shadow:0 calc(var(--u)*2) calc(var(--u)*6) rgba(0,0,0,.3);padding:calc(var(--u)*4) calc(var(--u)*6);text-align:center;max-width:90vw;max-height:94vh;position:relative;animation:pop .35s cubic-bezier(.2,1.5,.4,1)}
+.card h2{font-size:calc(var(--u)*7);font-weight:900;color:#ff8a1e;margin-bottom:calc(var(--u)*1.5)}
+.card p{font-size:calc(var(--u)*3.8);font-weight:700;color:#6b4f2a}
+.card .x{position:absolute;top:calc(var(--u)*-3);right:calc(var(--u)*-3);width:calc(var(--u)*10);height:calc(var(--u)*10);border-radius:50%;background:#ff6b6b;color:#fff;font-size:calc(var(--u)*6);font-weight:900;border:calc(var(--u)*.7) solid #fff;box-shadow:0 calc(var(--u)*.6) 0 #c94848;line-height:1}
+.buybtn{margin-top:calc(var(--u)*3);padding:calc(var(--u)*2.6) calc(var(--u)*6);border-radius:calc(var(--u)*5);background:linear-gradient(#7ee05d,#3fb52c);color:#fff;font-weight:900;font-size:calc(var(--u)*5.5);border:calc(var(--u)*.7) solid #fff;box-shadow:0 calc(var(--u)*1.2) 0 #2c7d1b;text-shadow:0 calc(var(--u)*.3) 0 rgba(0,0,0,.2)}
+.buybtn:active{transform:translateY(calc(var(--u)*.8))}
+.linkbtn{margin-top:calc(var(--u)*2);background:none;font-size:calc(var(--u)*3.2);font-weight:800;color:#a07c4a;text-decoration:underline}
+.feat{display:flex;gap:calc(var(--u)*3);justify-content:center;margin:calc(var(--u)*2) 0}
+.feat div{background:#fff;border-radius:calc(var(--u)*3);padding:calc(var(--u)*1.6) calc(var(--u)*2.4);font-weight:800;font-size:calc(var(--u)*3.4);color:#6b4f2a;box-shadow:0 calc(var(--u)*.6) 0 #f0d6ad}
+.feat b{display:block;font-size:calc(var(--u)*6);color:#3fb52c}
+.gq{font-size:calc(var(--u)*8);font-weight:900;color:#2f86f0;margin:calc(var(--u)*1) 0}
+.gin{min-width:calc(var(--u)*22);height:calc(var(--u)*11);margin:0 auto calc(var(--u)*2);border-radius:calc(var(--u)*2.5);background:#fff;border:calc(var(--u)*.6) solid #e8cfa3;font-size:calc(var(--u)*7);font-weight:900;display:flex;align-items:center;justify-content:center;color:#3a2c1c}
+.pad{display:grid;grid-template-columns:repeat(6,calc(var(--u)*11));gap:calc(var(--u)*1.6);justify-content:center}
+.pad button{height:calc(var(--u)*10);border-radius:calc(var(--u)*2.5);background:#fff;font-size:calc(var(--u)*5.5);font-weight:900;color:#6b4f2a;box-shadow:0 calc(var(--u)*.7) 0 #e2c597}
+.pad button:active{transform:translateY(calc(var(--u)*.5))}
+.pad .ok{background:#5ccf3c;color:#fff;box-shadow:0 calc(var(--u)*.7) 0 #2c7d1b}
+.pad .del{background:#ffb04d;color:#fff;box-shadow:0 calc(var(--u)*.7) 0 #c95f00}
+.gin.err{animation:shake2 .4s;border-color:#ff6b6b}
+@keyframes shake2{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.policy{text-align:left;max-height:60vh;overflow-y:auto;padding-right:calc(var(--u)*2);width:min(80vw,calc(var(--u)*130))}
+.policy h3{font-size:calc(var(--u)*4.2);color:#ff8a1e;margin:calc(var(--u)*2) 0 calc(var(--u)*.6)}
+.policy p,.policy li{font-size:calc(var(--u)*3.3);font-weight:600;line-height:1.45;color:#5b4423}
+.policy ul{padding-left:1.2em}
+.toast{position:fixed;left:50%;top:calc(var(--u)*6);transform:translateX(-50%) translateY(-250%);background:#3fb52c;color:#fff;font-weight:900;font-size:calc(var(--u)*4.4);padding:calc(var(--u)*2) calc(var(--u)*5);border-radius:99px;border:calc(var(--u)*.6) solid #fff;z-index:40;transition:transform .35s cubic-bezier(.2,1.5,.4,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:30}
+#rotate{position:fixed;inset:0;background:#ffe9b8;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:4vw;font-weight:900;font-size:6vw;color:#6b4f2a;text-align:center;padding:8vw}
+#rotate svg{width:30vw;animation:rot 1.8s ease-in-out infinite}
+@keyframes rot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+@media (orientation:portrait){#rotate{display:flex}}
+</style>
+</head>
+<body>
+
+<!-- ===== SPLASH ===== -->
+<div id="splash" class="screen active">
+  <div class="wrap">
+    <div class="logoBox"><svg class="logo" id="studioLogo" viewBox="-40 -10 380 280">
+      <defs><clipPath id="headClip"><ellipse cx="150" cy="150" rx="108" ry="94"/></clipPath></defs>
+      <path class="spark" d="M-2 58 Q2 72 16 76 Q2 80 -2 94 Q-6 80 -20 76 Q-6 72 -2 58Z" fill="#FFD43B"/>
+      <path class="spark" d="M318 24 Q321 35 332 38 Q321 41 318 52 Q315 41 304 38 Q315 35 318 24Z" fill="#FF6B8B"/>
+      <path class="spark" d="M326 148 Q329 159 340 162 Q329 165 326 176 Q323 165 312 162 Q323 159 326 148Z" fill="#5BB8F5"/>
+      <path class="spark" d="M-2 206 Q1 216 11 219 Q1 222 -2 232 Q-5 222 -15 219 Q-5 216 -2 206Z" fill="#9B7BF0"/>
+      <circle cx="30" cy="132" r="6" fill="#FF9A66"/><circle cx="292" cy="254" r="7" fill="#7FD3B8"/>
+      <g class="head">
+        <circle cx="78" cy="60" r="50" fill="#1f1d24"/><circle cx="222" cy="60" r="50" fill="#1f1d24"/>
+        <ellipse cx="150" cy="150" rx="108" ry="94" fill="#fff"/>
+        <g clip-path="url(#headClip)"><ellipse cx="150" cy="262" rx="150" ry="64" fill="#E4E0F5"/></g>
+        <ellipse cx="150" cy="150" rx="108" ry="94" fill="none" stroke="#1f1d24" stroke-width="11"/>
+        <ellipse cx="104" cy="140" rx="34" ry="38" fill="#1f1d24" transform="rotate(12 104 140)"/>
+        <ellipse cx="196" cy="140" rx="34" ry="38" fill="#1f1d24" transform="rotate(-12 196 140)"/>
+        <g class="blink" style="transform-origin:150px 142px">
+          <circle cx="110" cy="142" r="14" fill="#0d0c10"/><circle cx="190" cy="142" r="14" fill="#0d0c10"/>
+          <circle cx="104" cy="136" r="5.5" fill="#fff"/><circle cx="184" cy="136" r="5.5" fill="#fff"/>
+          <circle cx="114" cy="148" r="2.2" fill="#fff"/><circle cx="194" cy="148" r="2.2" fill="#fff"/>
+        </g>
+        <ellipse cx="78" cy="192" rx="26" ry="17" fill="#FFAFC0"/><ellipse cx="222" cy="192" rx="26" ry="17" fill="#FFAFC0"/>
+        <path d="M138 180 Q150 175 162 180 Q158 192 150 197 Q142 192 138 180Z" fill="#1f1d24" stroke="#1f1d24" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M122 208 Q136 220 150 208 Q164 220 178 208" fill="none" stroke="#1f1d24" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </svg></div>
+    <div class="brand">PANDA GAMES STUDIO</div>
+  </div>
+</div>
+
+<!-- ===== MENU ===== -->
+<div id="menu" class="screen">
+  <div class="bg"></div>
+  <svg class="mascot" id="mascotA" viewBox="-40 -10 380 280"></svg>
+  <svg class="mascot2" id="mascotB" viewBox="0 0 200 200"></svg>
+  <div class="corner"><button class="rbtn" id="mSound" aria-label="Ses"></button></div>
+  <div class="content">
+    <div class="title"><span class="r">Panda</span> <span class="o">Farkı</span> <span class="g">Bul!</span></div>
+    <div class="tag">İki resim arasındaki farkları bul!</div>
+    <button class="mbtn play" id="btnPlay">▶ <span id="playLbl">Oyna</span></button>
+    <button class="mbtn lvls" id="btnLevels">★ Seviyeler <small>(1-50)</small></button>
+    <button class="mbtn priv" id="btnPrivacy">🔒 Gizlilik Politikası</button>
+  </div>
+  <button class="pill" id="btnReset" style="left:calc(var(--u)*3);top:calc(var(--u)*3)">↺ İlerlemeyi Sıfırla</button>
+  <div class="studio">Panda Games Studio</div>
+</div>
+
+<!-- ===== LEVELS ===== -->
+<div id="levels" class="screen">
+  <div class="bg"></div>
+  <div class="top">
+    <button class="rbtn" id="lvHome" aria-label="Ana menü"></button>
+    <div class="title"><span class="o">Seviye</span> <span class="b">Seç</span></div>
+    <button class="rbtn green" id="lvUnlock" aria-label="Tümünü aç"></button>
+  </div>
+  <div class="gridwrap"><div class="grid" id="grid"></div></div>
+</div>
+
+<!-- ===== GAME ===== -->
+<div id="game" class="screen">
+  <div class="bg"></div>
+  <div class="hdr">
+    <div class="grp"><button class="rbtn" id="gHome" aria-label="Ana menü"></button></div>
+    <div class="title"><span class="r">Panda</span> <span class="o">Farkı</span> <span class="g">Bul!</span></div>
+    <div class="grp"><button class="rbtn" id="gSound" aria-label="Ses"></button><button class="rbtn" id="gHelp" aria-label="Yardım" style="font-size:calc(var(--u)*6.5)">?</button></div>
+  </div>
+  <div class="info"><div class="lname" id="lname">Seviye 1 • Ormandaki Panda</div><div class="cnt" id="cnt">Farklar: <b>0</b> / 3</div></div>
+  <div class="frames">
+    <div class="frame" id="frameL"></div>
+    <div class="frame" id="frameR"></div>
+  </div>
+  <div class="sideL"><button class="rbtn" id="gBack" aria-label="Seviyeler"></button></div>
+  <div class="sideR">
+    <button class="rbtn orange withlbl" id="gHint" aria-label="İpucu"></button>
+    <button class="rbtn green big" id="btnNext" aria-label="Sonraki seviye"></button>
+  </div>
+  <div class="bubble" id="bubble">Harika!</div>
+</div>
+
+<!-- ===== OVERLAYS ===== -->
+<div class="ov" id="ovPay"><div class="card">
+  <button class="x" data-close="ovPay">×</button>
+  <h2>Tüm Seviyeleri Aç!</h2>
+  <p>İlk 10 seviye bitti, harika gidiyorsun! 🐼</p>
+  <div class="feat"><div><b>40</b>yeni seviye</div><div><b>∞</b>sınırsız oyun</div><div><b>0</b>reklam</div></div>
+  <button class="buybtn" id="btnBuy">Tüm Seviyeleri Aç - 24.99 TL</button><br>
+  <button class="linkbtn" id="btnRestore">Satın alımları geri yükle</button>
+  <p style="font-size:calc(var(--u)*2.8);margin-top:calc(var(--u)*1.5);opacity:.75">Tek seferlik ödeme • Abonelik yok</p>
+</div></div>
+
+<div class="ov" id="ovGate"><div class="card">
+  <button class="x" data-close="ovGate">×</button>
+  <h2 style="color:#2f86f0">Ebeveyn Onayı</h2>
+  <p>Devam etmek için soruyu yanıtlayın:</p>
+  <div class="gq" id="gateQ">3 + 4 = ?</div>
+  <div class="gin" id="gateIn"></div>
+  <div class="pad" id="gatePad"></div>
+</div></div>
+
+<div class="ov" id="ovPolicy"><div class="card">
+  <button class="x" data-close="ovPolicy">×</button>
+  <h2>Gizlilik Politikası</h2>
+  <div class="policy">
+    <p><b>Panda Games Studio – "Panda Farkı Bul!"</b><br>Son güncelleme: 31 Ekim 2026</p>
+    <h3>Veri toplamıyoruz</h3>
+    <p>Bu uygulama 2-5 yaş arası çocuklar için tasarlanmıştır. Kişisel bilgi (ad, e-posta, konum, fotoğraf, cihaz kimliği vb.) toplamaz, saklamaz veya üçüncü taraflarla paylaşmaz.</p>
+    <h3>Cihazda saklanan bilgiler</h3>
+    <p>Oyun ilerlemesi (açılan seviyeler, ses ayarı, satın alma durumu) yalnızca cihazınızda yerel olarak saklanır ve hiçbir sunucuya gönderilmez.</p>
+    <h3>Reklam ve takip</h3>
+    <p>Uygulamada reklam, analitik veya takip aracı bulunmaz. İnternet bağlantısı gerektirmez.</p>
+    <h3>Uygulama içi satın alma</h3>
+    <ul><li>İlk 10 seviye ücretsizdir.</li><li>Tüm seviyelerin kilidi tek seferlik 24.99 TL ödeme ile açılır.</li><li>Satın alma ekranı ebeveyn doğrulaması (matematik sorusu) ile korunur. Ödemeler Google Play tarafından işlenir; ödeme bilgilerinize erişimimiz yoktur.</li></ul>
+    <h3>Seslendirme</h3>
+    <p>Kısa Türkçe yönergeler cihazdaki metin okuma motoruyla seslendirilir. Mikrofon kullanılmaz, ses kaydı alınmaz.</p>
+    <h3>Çocukların gizliliği</h3>
+    <p>Uygulama, Google Play Aileler Politikası ve COPPA / KVKK ilkeleri gözetilerek hazırlanmıştır.</p>
+    <h3>İletişim</h3>
+    <p>Sorularınız için: Panda Games Studio – Google Play geliştirici sayfasındaki iletişim adresi.</p>
+  </div>
+</div></div>
+
+<div class="toast" id="toast">Tüm seviyeler açıldı!</div>
+<canvas id="confetti"></canvas>
+<div id="rotate">
+  <svg viewBox="0 0 100 100"><rect x="30" y="10" width="40" height="80" rx="8" fill="#fff" stroke="#6b4f2a" stroke-width="5"/><circle cx="50" cy="80" r="4" fill="#6b4f2a"/></svg>
+  Lütfen cihazı yan çevir
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ================= CONFIG ================= */
+const TOTAL_LEVELS = 50, FREE_LEVELS = 10, PRICE = "24.99 TL";
+const STORE_KEY = "pgs_farki_bul_v1";
+const TAP_TOLERANCE = 16;   // küçük parmaklar için ekstra dokunma payı (SVG birimi)
+const K = "#222";
+
+/* ================= SVG HELPERS (viewBox 0 0 400 400) ================= */
+const RAD = Math.PI/180, r1 = v => Math.round(v*10)/10;
+function starPath(cx, cy, R, r){ r = r || R*.45; let d = "";
+  for (let i=0;i<10;i++){ const a=(i*36-90)*RAD, q=i%2?r:R; d += (i?"L":"M") + r1(cx+q*Math.cos(a)) + " " + r1(cy+q*Math.sin(a)); } return d + "Z"; }
+function flower(x, y, c, s){ s = s || 1;
+  let p = "";
+  for (let i=0;i<5;i++){ const a=(i*72-90)*RAD; p += `<circle cx="${r1(11*Math.cos(a))}" cy="${r1(11*Math.sin(a))}" r="9" fill="${c}"/>`; }
+  return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 8 V48" fill="none"/><path d="M0 34 Q14 22 22 28 Q14 40 0 38Z" fill="#5fb84a" stroke-width="4"/>${p}<circle r="7" fill="#FFD93B"/></g>`; }
+function bamboo(x, w, joints){
+  return `<rect x="${x}" y="-10" width="${w}" height="340" rx="8" fill="#86cf5c"/>` +
+    joints.map(y=>`<path d="M${x} ${y} h${w}" fill="none" stroke-width="4"/>`).join(""); }
+function sunRays(cx, cy, rin, rout, n, half, c){ let s = "";
+  for (let i=0;i<n;i++){ const a=(i*360/n-90)*RAD, h=half*RAD, p=(ang,rr)=>r1(cx+rr*Math.cos(ang))+" "+r1(cy+rr*Math.sin(ang));
+    s += `<path d="M${p(a-h,rin)} L${p(a,rout)} L${p(a+h,rin)} Z" fill="${c}" stroke-width="4"/>`; } return s; }
+function fluffy(cx, cy, rx, ry, n, fill){ let d = "";
+  for (let i=0;i<=n;i++){ const a=i/n*2*Math.PI, x=r1(cx+rx*Math.cos(a)), y=r1(cy+ry*Math.sin(a));
+    if (!i){ d += `M${x} ${y}`; continue; }
+    const m=(i-.5)/n*2*Math.PI; d += ` Q${r1(cx+rx*1.32*Math.cos(m))} ${r1(cy+ry*1.32*Math.sin(m))} ${x} ${y}`; }
+  return `<path d="${d}Z" fill="${fill}"/>`; }
+function cloud(x, y, s){ return `<path transform="translate(${x} ${y}) scale(${s||1})" d="M-40 20 Q-54 20 -52 6 Q-50 -8 -34 -6 Q-28 -24 -8 -20 Q6 -32 20 -18 Q40 -20 42 -2 Q56 2 52 16 Q48 24 36 24 H-32 Q-40 24 -40 20Z" fill="#fff"/>`; }
+
+/* ================= SCENES =================
+   base: her iki resimde ortak çizim katmanları (dizi, sıralı çizilir)
+   diffs: {x,y,r, L:'sol resimdeki hali', R:'sağ resimdeki hali', at: base içindeki ekleme sırası}
+   Bir fark sol ya da sağ resimde boş ("") olabilir (eksik nesne). */
+const SCENES = [
+ /* ---------- Seviye 1: Ormandaki Panda ---------- */
+ { name:"Ormandaki Panda", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>`,
+   `<path d="M250 -5 Q270 40 310 30 Q340 60 375 40 Q400 50 405 30 V-5Z" fill="#5fb84a"/>`,
+   bamboo(18,24,[70,150,230]) + bamboo(56,20,[100,190,270]) + bamboo(332,22,[90,170,250]) + bamboo(366,24,[60,140,220]),
+   `<path d="M42 110 Q66 88 92 96 Q70 118 42 114Z" fill="#5fb84a" stroke-width="4"/><path d="M332 130 Q306 110 284 120 Q306 140 332 134Z" fill="#5fb84a" stroke-width="4"/>`,
+   {diff:0},
+   cloud(290,70),
+   `<path d="M0 285 Q100 262 200 278 Q300 294 400 268 V400 H0Z" fill="#8FD96A"/>`,
+   /* panda */
+   `<ellipse cx="200" cy="300" rx="70" ry="62" fill="#fff"/>
+    <ellipse cx="148" cy="292" rx="20" ry="34" transform="rotate(25 148 292)" fill="#2a2a30"/>
+    <ellipse cx="252" cy="292" rx="20" ry="34" transform="rotate(-25 252 292)" fill="#2a2a30"/>
+    <ellipse cx="150" cy="356" rx="30" ry="22" fill="#2a2a30"/><ellipse cx="250" cy="356" rx="30" ry="22" fill="#2a2a30"/>
+    <circle cx="150" cy="358" r="10" fill="#FFAFC0" stroke-width="3"/><circle cx="250" cy="358" r="10" fill="#FFAFC0" stroke-width="3"/>
+    <circle cx="150" cy="142" r="22" fill="#2a2a30"/><circle cx="250" cy="142" r="22" fill="#2a2a30"/>
+    <circle cx="200" cy="195" r="62" fill="#fff"/>
+    <ellipse cx="176" cy="190" rx="15" ry="20" transform="rotate(25 176 190)" fill="#2a2a30"/>
+    <ellipse cx="224" cy="190" rx="15" ry="20" transform="rotate(-25 224 190)" fill="#2a2a30"/>
+    <circle cx="178" cy="188" r="6" fill="#fff" stroke="none"/><circle cx="222" cy="188" r="6" fill="#fff" stroke="none"/>
+    <circle cx="179" cy="189" r="3" fill="#222" stroke="none"/><circle cx="221" cy="189" r="3" fill="#222" stroke="none"/>
+    <ellipse cx="164" cy="220" rx="10" ry="6" fill="#FFAFC0" stroke="none"/><ellipse cx="236" cy="220" rx="10" ry="6" fill="#FFAFC0" stroke="none"/>
+    <ellipse cx="200" cy="212" rx="9" ry="6" fill="#222"/>
+    <path d="M188 224 Q200 236 212 224" fill="none"/>`,
+   flower(55,330,"#FF4D4D") + flower(110,362,"#3D8BFF",.9) + flower(365,318,"#FF9A2E") + flower(372,382,"#A45CFF",.8),
+   {diff:2},
+   {diff:1}
+ ], diffs:[
+   { x:110, y:84, r:42, // güneşin gözlüğü
+     L:sunRays(110,85,40,58,10,11,"#FFD93B")+`<circle cx="110" cy="85" r="36" fill="#FFD93B"/><path d="M96 82 Q101 75 106 82 M114 82 Q119 75 124 82" fill="none" stroke-width="4"/><path d="M98 95 Q110 106 122 95" fill="none" stroke-width="4"/>`,
+     R:sunRays(110,85,40,58,10,11,"#FFD93B")+`<circle cx="110" cy="85" r="36" fill="#FFD93B"/><rect x="86" y="72" width="22" height="15" rx="6" fill="#222" stroke-width="3"/><rect x="112" y="72" width="22" height="15" rx="6" fill="#222" stroke-width="3"/><path d="M108 77 h4" stroke-width="3"/><path d="M98 95 Q110 106 122 95" fill="none" stroke-width="4"/>` },
+   { x:106, y:240, r:32, // kelebeğin kanadı (renk)
+     L:`<path d="M104 236 Q98 222 92 220 M108 236 Q114 222 120 220" fill="none" stroke-width="3"/>
+        <ellipse cx="93" cy="236" rx="14" ry="11" transform="rotate(-25 93 236)" fill="#7FD8FF" stroke-width="4"/>
+        <ellipse cx="119" cy="236" rx="14" ry="11" transform="rotate(25 119 236)" fill="#7FD8FF" stroke-width="4"/>
+        <ellipse cx="96" cy="252" rx="9" ry="7" fill="#C78BFF" stroke-width="4"/><ellipse cx="116" cy="252" rx="9" ry="7" fill="#C78BFF" stroke-width="4"/>
+        <ellipse cx="106" cy="244" rx="4" ry="13" fill="#222"/>`,
+     R:`<path d="M104 236 Q98 222 92 220 M108 236 Q114 222 120 220" fill="none" stroke-width="3"/>
+        <ellipse cx="93" cy="236" rx="14" ry="11" transform="rotate(-25 93 236)" fill="#FF8FB8" stroke-width="4"/>
+        <ellipse cx="119" cy="236" rx="14" ry="11" transform="rotate(25 119 236)" fill="#FF8FB8" stroke-width="4"/>
+        <ellipse cx="96" cy="252" rx="9" ry="7" fill="#C78BFF" stroke-width="4"/><ellipse cx="116" cy="252" rx="9" ry="7" fill="#C78BFF" stroke-width="4"/>
+        <ellipse cx="106" cy="244" rx="4" ry="13" fill="#222"/>` },
+   { x:300, y:326, r:38, // mantar
+     L:`<rect x="288" y="326" width="24" height="32" rx="8" fill="#FFF3DD"/>
+        <path d="M266 334 Q268 294 300 292 Q332 294 334 334 Z" fill="#FF4D4D"/>
+        <circle cx="286" cy="314" r="6" fill="#fff" stroke="none"/><circle cx="310" cy="306" r="5" fill="#fff" stroke="none"/><circle cx="316" cy="324" r="4" fill="#fff" stroke="none"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 2: Denizin Altında ---------- */
+ { name:"Denizin Altında", layers:[
+   `<rect width="400" height="400" fill="#5CC8F0" stroke="none"/><rect width="400" height="130" fill="#86DAF7" stroke="none"/>`,
+   `<path d="M0 330 Q100 310 200 325 Q300 340 400 318 V400 H0Z" fill="#F6D98B"/>`,
+   `<path d="M40 340 Q20 300 40 260 Q60 220 40 180 L56 182 Q74 222 56 262 Q38 300 58 340Z" fill="#3FC35A"/>
+    <path d="M350 330 Q330 290 350 250 Q370 210 350 170 L366 172 Q384 212 366 252 Q348 290 368 330Z" fill="#3FC35A"/>
+    <path d="M370 336 Q392 300 380 262 L392 262 Q404 300 384 338Z" fill="#2E8B3E"/>`,
+   `<g transform="translate(330 70)"><path d="M18 0 L34 -12 Q30 0 34 12Z" fill="#FFD93B" stroke-width="4"/><ellipse cx="0" cy="0" rx="22" ry="14" fill="#FFD93B" stroke-width="4"/><circle cx="-10" cy="-2" r="3" fill="#222" stroke="none"/></g>`,
+   `<circle cx="110" cy="140" r="10" fill="#DFF6FF" stroke-width="4"/><circle cx="94" cy="108" r="7" fill="#DFF6FF" stroke-width="4"/><circle cx="104" cy="82" r="5" fill="#DFF6FF" stroke-width="3"/>`,
+   {diff:0},
+   `<path d="M280 380 Q300 340 320 380 Z" fill="#FFD2A6"/><path d="M300 380 V352 M290 380 L296 356 M310 380 L304 356" fill="none" stroke-width="3"/>`,
+   {diff:1}
+ ], diffs:[
+   { x:210, y:195, r:95, // balığın rengi
+     L:fish("#FF9A2E","#FFD93B"), R:fish("#A45CFF","#FF8FB8") },
+   { x:100, y:352, r:38, // denizyıldızı
+     L:`<path d="${starPath(100,352,32,15)}" fill="#FF8FB8"/><circle cx="93" cy="348" r="3" fill="#222" stroke="none"/><circle cx="107" cy="348" r="3" fill="#222" stroke="none"/><path d="M94 357 Q100 362 106 357" fill="none" stroke-width="3"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 3: Evimizin Bahçesi ---------- */
+ { name:"Evimizin Bahçesi", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>`,
+   `<circle cx="50" cy="50" r="26" fill="#FFD93B"/>`, cloud(140,50,.8),
+   `<path d="M0 295 Q200 275 400 300 V400 H0Z" fill="#8FD96A"/>`,
+   `<rect x="200" y="96" width="28" height="56" fill="#C0504D"/>`,
+   {diff:1},
+   `<path d="M66 176 L165 88 L264 176 Z" fill="#FF6B6B"/>`,
+   `<rect x="85" y="172" width="160" height="133" fill="#FFD28A"/>`,
+   `<rect x="103" y="196" width="46" height="46" rx="4" fill="#BFE9FF"/><path d="M126 196 V242 M103 219 H149" fill="none" stroke-width="4"/>`,
+   {diff:0},
+   `<path d="M178 305 Q168 350 150 400 H248 Q230 350 218 305Z" fill="#EBD7AA"/>`,
+   `<rect x="306" y="200" width="30" height="112" rx="4" fill="#A0622D"/>`,
+   `<circle cx="321" cy="168" r="62" fill="#3FC35A"/>`,
+   `<circle cx="296" cy="148" r="11" fill="#FF4D4D" stroke-width="4"/><circle cx="318" cy="198" r="11" fill="#FF4D4D" stroke-width="4"/><circle cx="330" cy="128" r="11" fill="#FF4D4D" stroke-width="4"/>`,
+   {diff:2},
+   flower(50,318,"#A45CFF",.8) + flower(270,340,"#FF4D4D",.8) + flower(372,345,"#FF9A2E",.8)
+ ], diffs:[
+   { x:197, y:262, r:44, // kapının rengi
+     L:`<rect x="175" y="220" width="45" height="85" rx="6" fill="#3D8BFF"/><circle cx="210" cy="265" r="4" fill="#222" stroke="none"/>`,
+     R:`<rect x="175" y="220" width="45" height="85" rx="6" fill="#3FC35A"/><circle cx="210" cy="265" r="4" fill="#222" stroke="none"/>` },
+   { x:230, y:56, r:40, // bacadan çıkan duman
+     L:"",
+     R:`<circle cx="216" cy="78" r="11" fill="#fff" stroke-width="4"/><circle cx="230" cy="54" r="14" fill="#fff" stroke-width="4"/><circle cx="250" cy="30" r="17" fill="#fff" stroke-width="4"/>` },
+   { x:350, y:162, r:28, // ağaçtaki kırmızı elma
+     L:`<circle cx="350" cy="162" r="12" fill="#FF4D4D" stroke-width="4"/><path d="M350 150 Q352 142 358 140" fill="none" stroke-width="3"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 4: Uzay Macerası ---------- */
+ { name:"Uzay Macerası", layers:[
+   `<rect width="400" height="400" fill="#26357A" stroke="none"/>`,
+   [[40,40],[165,45],[262,150],[365,210],[30,190],[150,365],[372,368],[250,32],[330,290]].map(([x,y])=>`<path d="${starPath(x,y,9)}" fill="#FFE66D" stroke-width="3"/>`).join(""),
+   `<circle cx="320" cy="82" r="40" fill="#E6E9F2"/><circle cx="305" cy="72" r="9" fill="#C9CED9" stroke-width="3"/><circle cx="337" cy="98" r="7" fill="#C9CED9" stroke-width="3"/><circle cx="334" cy="64" r="5" fill="#C9CED9" stroke-width="3"/>`,
+   `<circle cx="85" cy="300" r="40" fill="#FF8FB8"/><path d="M50 284 Q85 296 120 284" fill="none" stroke-width="4"/>`,
+   {diff:0},
+   {diff:2},
+   `<path d="M195 300 Q220 362 245 300Z" fill="#FF9A2E"/><path d="M207 300 Q220 336 233 300Z" fill="#FFD93B" stroke-width="3"/>
+    <path d="M187 246 L150 302 L190 296Z" fill="#FF4D4D"/><path d="M253 246 L290 302 L250 296Z" fill="#FF4D4D"/>
+    <path d="M185 300 V170 Q185 120 220 88 Q255 120 255 170 V300 Z" fill="#fff"/>
+    <path d="M197 122 Q206 102 220 88 Q234 102 243 122 Z" fill="#FF4D4D"/>
+    <rect x="185" y="286" width="70" height="16" rx="4" fill="#FF4D4D"/>`,
+   {diff:1}
+ ], diffs:[
+   { x:85, y:300, r:62, // gezegenin halkası
+     L:`<ellipse cx="85" cy="300" rx="72" ry="17" transform="rotate(-15 85 300)" fill="none" stroke="#222" stroke-width="20"/><ellipse cx="85" cy="300" rx="72" ry="17" transform="rotate(-15 85 300)" fill="none" stroke="#FFD93B" stroke-width="10"/>`,
+     R:"" },
+   { x:220, y:192, r:32, // penceredeki panda
+     L:`<circle cx="220" cy="192" r="24" fill="#7FD8FF"/><path d="M206 184 Q210 174 220 172" fill="none" stroke="#fff" stroke-width="4"/>`,
+     R:`<circle cx="220" cy="192" r="24" fill="#7FD8FF"/><circle cx="209" cy="183" r="6" fill="#2a2a30" stroke-width="2"/><circle cx="231" cy="183" r="6" fill="#2a2a30" stroke-width="2"/>
+        <circle cx="220" cy="195" r="13" fill="#fff" stroke-width="3"/><ellipse cx="214" cy="193" rx="4" ry="5" fill="#2a2a30" stroke="none"/><ellipse cx="226" cy="193" rx="4" ry="5" fill="#2a2a30" stroke="none"/>
+        <ellipse cx="220" cy="200" rx="3" ry="2" fill="#222" stroke="none"/>` },
+   { x:92, y:96, r:38, // büyük yıldız
+     L:`<path d="${starPath(92,96,30,14)}" fill="#FFD93B"/><circle cx="86" cy="96" r="2.5" fill="#222" stroke="none"/><circle cx="98" cy="96" r="2.5" fill="#222" stroke="none"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 5: Doğum Günü Partisi ---------- */
+ { name:"Doğum Günü Partisi", layers:[
+   `<rect width="400" height="400" fill="#FFE7F0" stroke="none"/>`,
+   `<path d="M0 40 Q200 80 400 40" fill="none" stroke-width="4"/>` +
+     [[40,47,"#FF4D4D"],[100,55,"#FFD93B"],[160,59,"#3D8BFF"],[220,60,"#3FC35A"],[280,57,"#A45CFF"],[340,48,"#FF9A2E"]].map(([x,y,c])=>`<path d="M${x-20} ${y} L${x+20} ${y} L${x} ${y+34}Z" fill="${c}" stroke-width="4"/>`).join(""),
+   `<path d="M70 158 Q84 240 96 322 M130 133 Q120 230 108 322" fill="none" stroke-width="3"/>`,
+   `<ellipse cx="70" cy="120" rx="32" ry="38" fill="#FF4D4D"/><path d="M64 156 L76 156 L70 164Z" fill="#FF4D4D" stroke-width="3"/><path d="M52 104 Q56 92 66 88" fill="none" stroke="#fff" stroke-width="5"/>`,
+   {diff:1},
+   `<rect x="0" y="322" width="400" height="80" fill="#C98A4B"/><rect x="0" y="316" width="400" height="16" fill="#E0A867"/>`,
+   `<ellipse cx="200" cy="322" rx="96" ry="13" fill="#fff"/>`,
+   `<rect x="125" y="252" width="150" height="68" rx="10" fill="#FFD28A"/>
+    <path d="M125 262 Q125 252 135 252 H265 Q275 252 275 262 V272 Q265 286 255 272 Q245 288 235 272 Q225 286 215 272 Q205 288 195 272 Q185 286 175 272 Q165 288 155 272 Q145 286 135 272 Q127 282 125 272Z" fill="#FF8FB8"/>
+    <rect x="145" y="200" width="110" height="54" rx="10" fill="#FFD28A"/>
+    <path d="M145 210 Q145 200 155 200 H245 Q255 200 255 210 V220 Q245 232 235 220 Q225 234 215 220 Q205 234 195 220 Q185 232 175 220 Q165 234 155 220 Q147 228 145 220Z" fill="#FF8FB8"/>`,
+   `<rect x="164" y="160" width="12" height="40" rx="3" fill="#7FD8FF"/><path d="M170 132 Q178 144 174 152 Q170 157 166 152 Q162 144 170 132Z" fill="#FF9A2E" stroke-width="3"/>
+    <rect x="224" y="160" width="12" height="40" rx="3" fill="#7FD8FF"/><path d="M230 132 Q238 144 234 152 Q230 157 226 152 Q222 144 230 132Z" fill="#FF9A2E" stroke-width="3"/>`,
+   {diff:0},
+   `<rect x="290" y="262" width="80" height="60" fill="#A45CFF"/><rect x="284" y="248" width="92" height="20" rx="3" fill="#A45CFF"/><rect x="322" y="248" width="16" height="74" fill="#FFD93B" stroke-width="4"/>`,
+   {diff:2}
+ ], diffs:[
+   { x:200, y:166, r:32, // ortadaki mum
+     L:`<rect x="194" y="160" width="12" height="40" rx="3" fill="#7FD8FF"/><path d="M200 132 Q208 144 204 152 Q200 157 196 152 Q192 144 200 132Z" fill="#FF9A2E" stroke-width="3"/>`,
+     R:"" },
+   { x:130, y:96, r:42, // balonun rengi
+     L:`<ellipse cx="130" cy="95" rx="32" ry="38" fill="#3D8BFF"/><path d="M124 131 L136 131 L130 139Z" fill="#3D8BFF" stroke-width="3"/><path d="M112 80 Q116 68 126 64" fill="none" stroke="#fff" stroke-width="5"/>`,
+     R:`<ellipse cx="130" cy="95" rx="32" ry="38" fill="#FFD93B"/><path d="M124 131 L136 131 L130 139Z" fill="#FFD93B" stroke-width="3"/><path d="M112 80 Q116 68 126 64" fill="none" stroke="#fff" stroke-width="5"/>` },
+   { x:330, y:236, r:36, // hediyenin fiyonku
+     L:`<path d="M330 248 Q298 214 294 236 Q294 254 330 248Z" fill="#FFD93B" stroke-width="4"/><path d="M330 248 Q362 214 366 236 Q366 254 330 248Z" fill="#FFD93B" stroke-width="4"/><circle cx="330" cy="246" r="7" fill="#FFD93B" stroke-width="4"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 6: Sevimli Çiftlik (4 fark) ---------- */
+ { name:"Sevimli Çiftlik", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>`,
+   `<circle cx="345" cy="55" r="26" fill="#FFD93B"/>` + cloud(140,55,.8),
+   {diff:3},
+   `<path d="M0 250 Q200 222 400 250 V400 H0Z" fill="#8FD96A"/>`,
+   `<rect x="20" y="132" width="110" height="118" fill="#FF6B6B"/><path d="M8 138 L75 82 L142 138Z" fill="#C0504D"/>
+    <rect x="60" y="148" width="30" height="24" fill="#FFD93B"/>
+    <rect x="52" y="190" width="46" height="60" fill="#fff"/><path d="M52 190 L98 250 M98 190 L52 250" fill="none" stroke-width="4"/>`,
+   {diff:2},
+   `<rect x="282" y="338" width="11" height="32" rx="4" fill="#2a2a30"/><rect x="326" y="338" width="11" height="32" rx="4" fill="#2a2a30"/>`,
+   {diff:0},
+   `<ellipse cx="346" cy="290" rx="10" ry="5" transform="rotate(-30 346 290)" fill="#2a2a30"/>
+    <ellipse cx="362" cy="304" rx="18" ry="23" fill="#2a2a30"/>
+    <circle cx="356" cy="299" r="4" fill="#fff" stroke="none"/><circle cx="368" cy="299" r="4" fill="#fff" stroke="none"/>`,
+   `<rect x="188" y="264" width="10" height="38" rx="3" fill="#777"/>
+    <rect x="58" y="252" width="74" height="80" rx="6" fill="#3FC35A"/><rect x="70" y="264" width="50" height="34" rx="4" fill="#BFE9FF"/>
+    <rect x="120" y="298" width="108" height="46" rx="8" fill="#3FC35A"/>
+    <circle cx="200" cy="352" r="24" fill="#2a2a30"/><circle cx="200" cy="352" r="9" fill="#FFD93B" stroke-width="4"/>`,
+   {diff:1}
+ ], diffs:[
+   { x:310, y:318, r:52, // koyunun yünü
+     L:fluffy(310,318,48,30,12,"#fff"), R:fluffy(310,318,48,30,12,"#FF8FB8") },
+   { x:95, y:345, r:42, // traktörün tekeri
+     L:`<circle cx="95" cy="345" r="40" fill="#2a2a30"/><circle cx="95" cy="345" r="18" fill="#FFD93B" stroke-width="4"/>`,
+     R:`<circle cx="95" cy="345" r="40" fill="#2a2a30"/><circle cx="95" cy="345" r="18" fill="#3D8BFF" stroke-width="4"/>` },
+   { x:318, y:250, r:66, zones:[[272,250,40],[355,250,40]], // çitin rengi
+     L:fence("#fff"), R:fence("#FF9A2E") },
+   { x:228, y:86, r:30, // uçan kuş
+     L:"",
+     R:`<path d="M244 88 L260 78 L258 98Z" fill="#3D8BFF" stroke-width="4"/><ellipse cx="228" cy="88" rx="19" ry="13" fill="#3D8BFF"/>
+        <path d="M226 84 Q236 64 250 72 Q242 88 226 88Z" fill="#7FD8FF" stroke-width="4"/>
+        <path d="M210 85 L198 90 L210 95Z" fill="#FF9A2E" stroke-width="3"/><circle cx="218" cy="84" r="2.6" fill="#222" stroke="none"/>` }
+ ]},
+ /* ---------- Seviye 7: Kutup Ayısı ve Buzullar (3 fark) ---------- */
+ { name:"Kutup Ayısı ve Buzullar", layers:[
+   `<rect width="400" height="400" fill="#A9D8F5" stroke="none"/>`,
+   [[40,40],[150,30],[230,72],[385,140],[90,110]].map(([x,y])=>`<path d="${starPath(x,y,7)}" fill="#fff" stroke-width="3"/>`).join(""),
+   {diff:2},
+   `<path d="M0 262 L40 170 L80 210 L120 150 L170 262Z" fill="#E8F7FF"/><path d="M240 262 L295 190 L335 220 L375 168 L405 205 V262Z" fill="#E8F7FF"/>`,
+   `<rect x="0" y="258" width="400" height="142" fill="#5CC8F0"/>
+    <path d="M30 362 Q45 354 60 362 M300 382 Q315 374 330 382 M150 386 Q165 378 180 386" fill="none" stroke="#fff" stroke-width="4"/>`,
+   `<path d="M14 290 Q24 252 120 246 H300 Q384 250 392 290 Q300 316 200 312 Q90 316 14 290Z" fill="#fff"/>`,
+   `<rect x="152" y="246" width="28" height="48" rx="12" fill="#FFF8E7"/><rect x="232" y="246" width="28" height="48" rx="12" fill="#FFF8E7"/>
+    <circle cx="290" cy="208" r="10" fill="#FFF8E7"/>
+    <ellipse cx="215" cy="222" rx="78" ry="46" fill="#FFF8E7"/>`,
+   {diff:0},
+   `<circle cx="116" cy="174" r="15" fill="#FFF8E7"/><circle cx="168" cy="174" r="15" fill="#FFF8E7"/>
+    <circle cx="116" cy="174" r="6" fill="#FFAFC0" stroke="none"/><circle cx="168" cy="174" r="6" fill="#FFAFC0" stroke="none"/>
+    <circle cx="142" cy="205" r="40" fill="#FFF8E7"/>
+    <ellipse cx="142" cy="223" rx="18" ry="13" fill="#fff"/><ellipse cx="142" cy="216" rx="7" ry="5" fill="#222"/>
+    <circle cx="128" cy="197" r="5" fill="#222" stroke="none"/><circle cx="156" cy="197" r="5" fill="#222" stroke="none"/>
+    <path d="M134 229 Q142 235 150 229" fill="none" stroke-width="3"/>`,
+   {diff:1}
+ ], diffs:[
+   { x:186, y:228, r:38, // atkı
+     L:`<path d="M172 182 Q192 205 178 246 L196 248 Q208 206 188 176Z" fill="#FF4D4D"/>
+        <path d="M182 240 L174 280 L192 282 L196 244Z" fill="#FF4D4D"/>
+        <path d="M176 262 H192 M178 272 H191" fill="none" stroke="#fff" stroke-width="4"/>`,
+     R:"" },
+   { x:332, y:272, r:32, // buzda kayan balık
+     L:`<path d="M346 271 L364 260 L364 283Z" fill="#FF9A2E" stroke-width="4"/><ellipse cx="326" cy="272" rx="22" ry="11" fill="#FF9A2E" stroke-width="4"/><circle cx="314" cy="269" r="2.6" fill="#222" stroke="none"/>`,
+     R:"" },
+   { x:310, y:72, r:36, // ay
+     L:`<path d="M330 38 A34 34 0 1 0 330 106 A40 40 0 0 1 330 38Z" fill="#FFE66D"/><circle cx="306" cy="62" r="3" fill="#222" stroke="none"/><path d="M302 80 Q307 84 312 80" fill="none" stroke-width="3"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 8: Oyuncak Odası (4 fark) ---------- */
+ { name:"Oyuncak Odası", layers:[
+   `<rect width="400" height="400" fill="#FFF1D6" stroke="none"/>`,
+   `<rect x="270" y="48" width="100" height="90" rx="8" fill="#BFE9FF"/><path d="M320 48 V138 M270 93 H370" fill="none" stroke-width="5"/>`,
+   {diff:1},
+   `<rect x="0" y="270" width="400" height="130" fill="#E0A867"/><path d="M0 312 H400 M0 356 H400" fill="none" stroke-width="3"/>`,
+   `<rect x="186" y="288" width="40" height="40" rx="5" fill="#FFD93B"/><rect x="198" y="250" width="40" height="40" rx="5" fill="#3FC35A"/>
+    <path d="M198 300 h16 M206 300 v18 M210 262 v16 h16" fill="none" stroke="#fff" stroke-width="4"/>`,
+   `<rect x="34" y="272" width="68" height="14" rx="4" fill="#FF4D4D"/><rect x="40" y="284" width="56" height="62" rx="6" fill="#3D8BFF"/>
+    <rect x="50" y="294" width="34" height="24" rx="3" fill="#BFE9FF"/>`,
+   {diff:0},
+   `<rect x="96" y="304" width="80" height="42" rx="8" fill="#FF4D4D"/>
+    <circle cx="66" cy="350" r="15" fill="#2a2a30"/><circle cx="114" cy="350" r="15" fill="#2a2a30"/><circle cx="156" cy="350" r="15" fill="#2a2a30"/>
+    <circle cx="66" cy="350" r="5" fill="#FFD93B" stroke="none"/><circle cx="114" cy="350" r="5" fill="#FFD93B" stroke="none"/><circle cx="156" cy="350" r="5" fill="#FFD93B" stroke="none"/>`,
+   {diff:2},
+   `<ellipse cx="300" cy="342" rx="20" ry="14" fill="#D9A066"/><ellipse cx="364" cy="342" rx="20" ry="14" fill="#D9A066"/>
+    <ellipse cx="292" cy="290" rx="12" ry="24" transform="rotate(25 292 290)" fill="#D9A066"/><ellipse cx="372" cy="290" rx="12" ry="24" transform="rotate(-25 372 290)" fill="#D9A066"/>
+    <ellipse cx="332" cy="302" rx="40" ry="42" fill="#D9A066"/><ellipse cx="332" cy="308" rx="22" ry="24" fill="#F6DDBB" stroke-width="4"/>
+    <circle cx="306" cy="206" r="12" fill="#D9A066"/><circle cx="358" cy="206" r="12" fill="#D9A066"/>
+    <circle cx="332" cy="234" r="34" fill="#D9A066"/><ellipse cx="332" cy="246" rx="14" ry="10" fill="#F6DDBB" stroke-width="4"/>
+    <ellipse cx="332" cy="241" rx="5" ry="4" fill="#222"/><circle cx="320" cy="226" r="4" fill="#222" stroke="none"/><circle cx="344" cy="226" r="4" fill="#222" stroke="none"/>
+    <path d="M327 251 Q332 255 337 251" fill="none" stroke-width="3"/>`,
+   {diff:3}
+ ], diffs:[
+   { x:150, y:288, r:26, // trenin bacası
+     L:`<path d="M140 306 V284 H133 V270 H167 V284 H160 V306Z" fill="#2a2a30"/>`,
+     R:"" },
+   { x:80, y:85, r:38, // duvardaki saat
+     L:`<circle cx="80" cy="85" r="36" fill="#FF4D4D"/><circle cx="80" cy="85" r="26" fill="#fff"/><path d="M80 85 V66 M80 85 L94 93" fill="none" stroke-width="5"/>`,
+     R:`<circle cx="80" cy="85" r="36" fill="#3FC35A"/><circle cx="80" cy="85" r="26" fill="#fff"/><path d="M80 85 V66 M80 85 L94 93" fill="none" stroke-width="5"/>` },
+   { x:240, y:362, r:34, // topun deseni
+     L:`<circle cx="240" cy="362" r="30" fill="#FF4D4D"/><path d="M212 352 Q240 342 268 352 V372 Q240 382 212 372Z" fill="#fff" stroke-width="4"/>`,
+     R:`<circle cx="240" cy="362" r="30" fill="#FF4D4D"/><path d="${starPath(240,362,15)}" fill="#FFD93B" stroke-width="4"/>` },
+   { x:332, y:184, r:30, // ayıcığın şapkası
+     L:"",
+     R:`<path d="M312 206 L332 160 L352 206Z" fill="#3D8BFF"/><circle cx="326" cy="192" r="3" fill="#fff" stroke="none"/><circle cx="338" cy="182" r="3" fill="#fff" stroke="none"/><circle cx="332" cy="158" r="7" fill="#FFD93B" stroke-width="4"/>` }
+ ]},
+ /* ---------- Seviye 9: Piknik Zamanı (4 fark) ---------- */
+ { name:"Piknik Zamanı", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>`,
+   `<circle cx="352" cy="48" r="26" fill="#FFD93B"/>` + cloud(200,48,.7),
+   `<path d="M0 200 Q200 184 400 204 V400 H0Z" fill="#8FD96A"/>`,
+   `<rect x="40" y="118" width="26" height="110" fill="#A0622D"/>` + fluffy(53,98,50,38,10,"#3FC35A"),
+   {diff:3},
+   `<path d="M70 255 L330 255 L385 370 L15 370Z" fill="#FF6B6B"/>`,
+   {diff:0},
+   `<path d="M170 240 Q205 192 240 240" fill="none" stroke-width="9"/><path d="M170 240 Q205 192 240 240" fill="none" stroke="#D9A066" stroke-width="4"/>
+    <path d="M164 238 H246 L236 282 H174Z" fill="#D9A066"/><path d="M170 254 H240 M172 268 H238" fill="none" stroke-width="3"/>`,
+   `<rect x="284" y="228" width="34" height="56" rx="7" fill="#3D8BFF"/><path d="M290 250 H312" fill="none" stroke="#fff" stroke-width="4"/>`,
+   {diff:2},
+   {diff:1}
+ ], diffs:[
+   { x:200, y:318, r:78, zones:[[200,318,60],[95,335,45],[305,335,45]], // örtünün deseni
+     L:[280,310,340].map(y=>{ const a=70-(y-255)*55/115+8, b=330+(y-255)*55/115-8; return `<path d="M${r1(a)} ${y} H${r1(b)}" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="butt"/>`; }).join(""),
+     R:[[280,[90,150,210,270,320]],[310,[70,130,190,250,310,345]],[342,[50,110,170,230,290,350]]].map(([y,xs])=>xs.map(x=>`<circle cx="${x}" cy="${y}" r="7" fill="#fff" stroke="none"/>`).join("")).join("") },
+   { x:116, y:300, r:34, // karpuz dilimi
+     L:`<path d="M84 288 A32 32 0 0 0 148 288Z" fill="#3FC35A"/><path d="M92 288 A24 24 0 0 0 140 288Z" fill="#FF4D4D" stroke-width="3"/>
+        <circle cx="106" cy="296" r="2.6" fill="#222" stroke="none"/><circle cx="116" cy="302" r="2.6" fill="#222" stroke="none"/><circle cx="126" cy="296" r="2.6" fill="#222" stroke="none"/>`,
+     R:"" },
+   { x:301, y:222, r:26, // termosun kapağı
+     L:`<rect x="281" y="212" width="40" height="20" rx="5" fill="#FF4D4D"/>`,
+     R:`<rect x="281" y="212" width="40" height="20" rx="5" fill="#FFD93B"/>` },
+   { x:302, y:108, r:30, // uçan sarı arı
+     L:"",
+     R:`<path d="M294 100 Q284 78 296 74 Q306 84 302 102Z" fill="#DFF6FF" stroke-width="3"/><path d="M304 100 Q312 78 326 80 Q322 98 308 104Z" fill="#DFF6FF" stroke-width="3"/>
+        <ellipse cx="302" cy="114" rx="20" ry="14" fill="#FFD93B"/><path d="M297 101 V127 M309 101 V127" fill="none" stroke-width="5"/>
+        <path d="M322 114 L330 114" fill="none" stroke-width="3"/><circle cx="288" cy="110" r="2.6" fill="#222" stroke="none"/>` }
+ ]},
+ /* ---------- Seviye 10: Kamp Alanı & Çadır (4 fark) ---------- */
+ { name:"Kamp Alanı & Çadır", layers:[
+   `<rect width="400" height="400" fill="#5865C8" stroke="none"/>`,
+   [[30,30],[200,40],[250,110],[40,170],[200,180],[160,100]].map(([x,y])=>`<path d="${starPath(x,y,7)}" fill="#FFE66D" stroke-width="3"/>`).join(""),
+   {diff:2},
+   `<path d="M0 285 Q200 268 400 290 V400 H0Z" fill="#4FA84A"/>`,
+   `<rect x="316" y="160" width="32" height="140" fill="#A0622D"/>
+    <path d="M332 20 L282 100 H382Z" fill="#2E8B3E"/><path d="M332 60 L272 160 H392Z" fill="#2E8B3E"/><path d="M332 110 L264 216 H400Z" fill="#2E8B3E"/>`,
+   {diff:3},
+   {diff:0},
+   {diff:1},
+   `<rect x="226" y="344" width="74" height="14" rx="6" transform="rotate(14 263 351)" fill="#8B5A2B"/>
+    <rect x="226" y="344" width="74" height="14" rx="6" transform="rotate(-14 263 351)" fill="#8B5A2B"/>
+    <circle cx="218" cy="366" r="9" fill="#A3ABBA" stroke-width="4"/><circle cx="308" cy="366" r="9" fill="#A3ABBA" stroke-width="4"/>`
+ ], diffs:[
+   { x:170, y:240, r:72, // çadırın rengi
+     L:tent("#FF9A2E","#C95F00"), R:tent("#3FC35A","#2E8B3E") },
+   { x:264, y:316, r:36, // kamp ateşinin alevi
+     L:`<path d="M263 345 Q238 320 252 296 Q256 312 264 310 Q262 290 276 276 Q278 300 288 306 Q292 330 263 345Z" fill="#FF9A2E"/>
+        <path d="M264 342 Q252 328 260 314 Q266 324 272 320 Q280 332 264 342Z" fill="#FFD93B" stroke-width="3"/>`,
+     R:"" },
+   { x:110, y:84, r:36, // gökyüzündeki baykuş
+     L:"",
+     R:`<path d="M90 64 L94 46 L104 58Z M130 64 L126 46 L116 58Z" fill="#A0622D" stroke-width="4"/>
+        <ellipse cx="110" cy="86" rx="25" ry="30" fill="#A0622D"/><ellipse cx="110" cy="98" rx="14" ry="15" fill="#E8C27A" stroke-width="4"/>
+        <circle cx="100" cy="74" r="10" fill="#fff" stroke-width="4"/><circle cx="120" cy="74" r="10" fill="#fff" stroke-width="4"/>
+        <circle cx="101" cy="75" r="4.5" fill="#222" stroke="none"/><circle cx="119" cy="75" r="4.5" fill="#222" stroke="none"/>
+        <path d="M106 84 L110 92 L114 84Z" fill="#FF9A2E" stroke-width="3"/>
+        <path d="M86 84 Q74 96 86 110 M134 84 Q146 96 134 110" fill="none" stroke-width="4"/>` },
+   { x:366, y:232, r:30, // ağaçtaki sincap
+     L:`<path d="M368 252 Q396 240 388 208 Q380 194 370 212 Q384 228 364 242Z" fill="#C8763A"/>
+        <ellipse cx="356" cy="248" rx="11" ry="16" fill="#E08A45"/><path d="M350 222 L347 210 L357 218Z" fill="#E08A45" stroke-width="3"/>
+        <circle cx="354" cy="230" r="10" fill="#E08A45"/><circle cx="350" cy="229" r="2.4" fill="#222" stroke="none"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 11: Trafik & Şehir Meydanı (5 fark) ---------- */
+ { name:"Trafik & Şehir Meydanı", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(205,46,.7),
+   `<rect x="16" y="70" width="112" height="196" fill="#9FB6D9"/>` +
+     [86,130,174,218].map(y=>[30,76].map(x=>`<rect x="${x}" y="${y}" width="36" height="30" rx="3" fill="#DDF3FF" stroke-width="4"/>`).join("")).join(""),
+   `<rect x="268" y="40" width="116" height="226" fill="#F7C88A"/>` +
+     [56,100,144,188].map(y=>[282,334].map(x=> (x===282&&y===56) ? "" : `<rect x="${x}" y="${y}" width="36" height="30" rx="3" fill="#DDF3FF" stroke-width="4"/>`).join("")).join("") +
+     `<rect x="310" y="228" width="32" height="38" fill="#A0622D"/>`,
+   {diff:3},
+   `<rect x="0" y="262" width="400" height="30" fill="#D9D9E3"/><rect x="0" y="290" width="400" height="110" fill="#5A5F6B"/>`,
+   [20,100,260,340].map(x=>`<rect x="${x}" y="366" width="50" height="10" fill="#fff" stroke-width="3"/>`).join(""),
+   {diff:2},
+   `<rect x="150" y="150" width="10" height="114" fill="#777"/><rect x="133" y="62" width="44" height="100" rx="10" fill="#2a2a30"/>`,
+   {diff:0},
+   `<rect x="218" y="150" width="8" height="114" fill="#777"/>`,
+   {diff:4},
+   `<path d="M50 340 V318 Q50 306 64 304 L92 302 L112 276 H170 L192 302 L214 306 Q226 308 226 320 V340 Z" fill="#FFD93B"/>
+    <path d="M100 302 L116 284 H138 V302Z M146 302 V284 H166 L180 302Z" fill="#BFE9FF" stroke-width="4"/>
+    <rect x="52" y="318" width="172" height="8" fill="#222" stroke="none"/>
+    <circle cx="88" cy="342" r="15" fill="#2a2a30"/><circle cx="190" cy="342" r="15" fill="#2a2a30"/>
+    <circle cx="88" cy="342" r="5" fill="#ddd" stroke="none"/><circle cx="190" cy="342" r="5" fill="#ddd" stroke="none"/>`,
+   {diff:1}
+ ], diffs:[
+   { x:155, y:112, r:48, // trafik lambasının ışığı
+     L:`<circle cx="155" cy="84" r="11" fill="#FF4D4D" stroke-width="3"/><circle cx="155" cy="112" r="11" fill="#6b6b6b" stroke-width="3"/><circle cx="155" cy="140" r="11" fill="#6b6b6b" stroke-width="3"/>`,
+     R:`<circle cx="155" cy="84" r="11" fill="#6b6b6b" stroke-width="3"/><circle cx="155" cy="112" r="11" fill="#6b6b6b" stroke-width="3"/><circle cx="155" cy="140" r="11" fill="#3FC35A" stroke-width="3"/>` },
+   { x:141, y:268, r:24, // taksinin tavanı
+     L:`<rect x="124" y="260" width="34" height="16" rx="4" fill="#fff"/><path d="M132 268 H150" fill="none" stroke-width="3"/>`,
+     R:"" },
+   { x:205, y:371, r:32, // yol çizgisi
+     L:`<rect x="180" y="366" width="50" height="10" fill="#fff" stroke-width="3"/>`,
+     R:"" },
+   { x:300, y:71, r:28, // bina penceresi
+     L:`<rect x="282" y="56" width="36" height="30" rx="3" fill="#FFD93B" stroke-width="4"/>`,
+     R:`<rect x="282" y="56" width="36" height="30" rx="3" fill="#DDF3FF" stroke-width="4"/>` },
+   { x:222, y:140, r:30, // tabela
+     L:`<circle cx="222" cy="140" r="24" fill="#3D8BFF"/><path d="M210 140 H232 M224 130 L234 140 L224 150" fill="none" stroke="#fff" stroke-width="5"/>`,
+     R:`<circle cx="222" cy="140" r="24" fill="#FF4D4D"/><rect x="208" y="135" width="28" height="10" rx="2" fill="#fff" stroke="none"/>` }
+ ]},
+ /* ---------- Seviye 12: Dinozorlar Vadisi (5 fark) ---------- */
+ { name:"Dinozorlar Vadisi", layers:[
+   `<rect width="400" height="400" fill="#FFE0B3" stroke="none"/><circle cx="60" cy="50" r="24" fill="#FF9A2E"/>`,
+   {diff:1},
+   `<path d="M232 232 L296 96 H350 L412 232Z" fill="#A0622D"/><path d="M296 96 Q310 124 322 106 Q334 126 350 96Z" fill="#FF4D4D" stroke-width="4"/>`,
+   `<path d="M0 225 Q200 210 400 228 V400 H0Z" fill="#9BE15D"/>`,
+   `<ellipse cx="318" cy="336" rx="72" ry="30" fill="#5CC8F0"/>`,
+   {diff:4},
+   `<path d="M80 262 Q30 272 10 236 Q50 252 86 240Z" fill="#3FC35A"/>
+    <rect x="100" y="280" width="26" height="42" rx="8" fill="#3FC35A"/><rect x="176" y="280" width="26" height="42" rx="8" fill="#3FC35A"/>`,
+   [105,195].map(x=>`<path d="M${x-14} 224 L${x} 194 L${x+14} 224Z" fill="#FF9A2E"/>`).join(""),
+   {diff:2},
+   `<ellipse cx="150" cy="255" rx="80" ry="45" fill="#3FC35A"/><ellipse cx="150" cy="272" rx="50" ry="22" fill="#B8F08A" stroke-width="4"/>
+    <circle cx="120" cy="238" r="7" fill="#2E8B3E" stroke="none"/><circle cx="160" cy="230" r="6" fill="#2E8B3E" stroke="none"/><circle cx="188" cy="244" r="7" fill="#2E8B3E" stroke="none"/>
+    <path d="M208 238 Q238 200 248 172 Q266 150 290 164 Q300 184 276 192 Q262 198 258 216 Q250 252 220 270Z" fill="#3FC35A"/>
+    <circle cx="275" cy="170" r="4.5" fill="#222" stroke="none"/><path d="M280 184 Q288 186 292 180" fill="none" stroke-width="3"/>`,
+   {diff:0},
+   {diff:3}
+ ], diffs:[
+   { x:50, y:340, r:36, // bebek dinozorun yumurtası
+     L:`<ellipse cx="50" cy="344" rx="24" ry="30" fill="#FFF3DD"/><circle cx="42" cy="334" r="5" fill="#FF8FB8" stroke="none"/><circle cx="58" cy="352" r="6" fill="#FF8FB8" stroke="none"/><circle cx="56" cy="330" r="3.5" fill="#FF8FB8" stroke="none"/>`,
+     R:`<circle cx="50" cy="322" r="15" fill="#7FD8A0"/><circle cx="45" cy="318" r="3" fill="#222" stroke="none"/><circle cx="56" cy="318" r="3" fill="#222" stroke="none"/><path d="M45 328 Q50 332 56 328" fill="none" stroke-width="3"/>
+        <path d="M26 342 L34 332 L42 342 L50 330 L58 342 L66 332 L74 342 Q74 374 50 374 Q26 374 26 342Z" fill="#FFF3DD"/>` },
+   { x:326, y:52, r:40, // volkan dumanı
+     L:fluffy(320,66,28,18,8,"#C9CED9") + fluffy(340,34,20,13,7,"#DDE1E8"),
+     R:"" },
+   { x:150, y:196, r:28, // dinozorun sırt dikeni
+     L:`<path d="M136 218 L150 184 L164 218Z" fill="#FF9A2E"/>`,
+     R:"" },
+   { x:190, y:360, r:32, // yerdeki fosil
+     L:`<path d="M164 360 Q156 350 164 346 Q172 344 172 354 H208 Q208 344 216 346 Q224 350 216 360 Q224 370 216 374 Q208 376 208 366 H172 Q172 376 164 374 Q156 370 164 360Z" fill="#fff"/>`,
+     R:"" },
+   { x:305, y:332, r:28, // göldeki nilüfer
+     L:`<ellipse cx="304" cy="336" rx="20" ry="9" fill="#3FC35A" stroke-width="4"/><path d="${starPath(306,327,10,4.5)}" fill="#FF8FB8" stroke-width="3"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 13: Sirk Gösterisi (4 fark) ---------- */
+ { name:"Sirk Gösterisi", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(60,60,.7),
+   `<path d="M350 0 V42" fill="none" stroke-width="4"/>`,
+   {diff:3},
+   `<rect x="0" y="252" width="400" height="148" fill="#F6D98B"/>`,
+   `<path d="M200 70 V40" fill="none" stroke-width="4"/>`,
+   {diff:1},
+   `<rect x="100" y="160" width="200" height="100" fill="#fff"/>` + [100,150,200,250].map(x=>`<rect x="${x}" y="160" width="25" height="100" fill="#FF4D4D" stroke-width="4"/>`).join("") +
+   `<path d="M88 165 L200 70 L312 165Z" fill="#FF4D4D"/><path d="M200 70 L150 165 H175Z M200 70 L225 165 H250Z" fill="#fff" stroke-width="4"/>
+    <path d="M175 260 V218 Q200 192 225 218 V260Z" fill="#2a2a30"/>`,
+   {diff:2},
+   `<rect x="278" y="276" width="16" height="22" rx="5" fill="#A3ABBA"/><rect x="312" y="276" width="16" height="22" rx="5" fill="#A3ABBA"/>
+    <path d="M260 262 Q248 256 246 270" fill="none" stroke-width="4"/>
+    <ellipse cx="300" cy="266" rx="42" ry="28" fill="#A3ABBA"/>
+    <path d="M354 248 Q378 236 372 208 L360 210 Q364 230 348 238Z" fill="#A3ABBA"/>
+    <circle cx="338" cy="240" r="24" fill="#A3ABBA"/><ellipse cx="322" cy="246" rx="13" ry="18" fill="#8E97A8"/>
+    <circle cx="344" cy="234" r="3.5" fill="#222" stroke="none"/>`,
+   `<circle cx="42" cy="226" r="14" fill="#FF9A2E"/><circle cx="102" cy="226" r="14" fill="#FF9A2E"/>
+    <path d="M40 382 L72 272 L104 382Z" fill="#3D8BFF"/><circle cx="64" cy="320" r="5" fill="#FFD93B" stroke="none"/><circle cx="82" cy="346" r="5" fill="#FFD93B" stroke="none"/><circle cx="60" cy="362" r="5" fill="#FFD93B" stroke="none"/>` +
+   fluffy(72,272,28,9,8,"#FFD93B") +
+   `<circle cx="72" cy="236" r="30" fill="#FFD2A6"/><path d="M56 208 L72 166 L88 208Z" fill="#3FC35A"/><circle cx="72" cy="164" r="6" fill="#FFD93B" stroke-width="4"/>
+    <circle cx="61" cy="228" r="4" fill="#222" stroke="none"/><circle cx="83" cy="228" r="4" fill="#222" stroke="none"/>
+    <path d="M58 250 Q72 262 86 250" fill="none" stroke="#FF4D4D" stroke-width="5"/>`,
+   {diff:0}
+ ], diffs:[
+   { x:72, y:240, r:22, // palyaçonun burnu
+     L:`<circle cx="72" cy="240" r="9" fill="#FF4D4D" stroke-width="4"/>`,
+     R:`<circle cx="72" cy="240" r="9" fill="#3D8BFF" stroke-width="4"/>` },
+   { x:214, y:50, r:26, // çadırın bayrağı
+     L:`<path d="M200 40 L236 50 L200 60Z" fill="#FFD93B" stroke-width="4"/>`,
+     R:`<path d="M200 40 L236 50 L200 60Z" fill="#3D8BFF" stroke-width="4"/>` },
+   { x:300, y:336, r:44, // filin topu
+     L:`<circle cx="300" cy="336" r="42" fill="#3D8BFF"/><path d="${starPath(300,336,18)}" fill="#FFD93B" stroke-width="4"/>`,
+     R:`<circle cx="300" cy="336" r="42" fill="#FF4D4D"/><path d="${starPath(300,336,18)}" fill="#FFD93B" stroke-width="4"/>` },
+   { x:350, y:58, r:30, // seyirci lambası
+     L:`<path d="M330 60 L340 40 H360 L370 60Z" fill="#A45CFF"/><circle cx="350" cy="66" r="9" fill="#FFD93B" stroke-width="4"/>
+        <path d="M350 82 V90 M336 76 L330 82 M364 76 L370 82" fill="none" stroke="#FF9A2E" stroke-width="4"/>`,
+     R:`<path d="M330 60 L340 40 H360 L370 60Z" fill="#A45CFF"/><circle cx="350" cy="66" r="9" fill="#6b6b6b" stroke-width="4"/>` }
+ ]},
+ /* ---------- Seviye 14: Havalimanı & Pist (5 fark) ---------- */
+ { name:"Havalimanı & Pist", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(260,56,.8) + cloud(150,36,.55),
+   `<rect x="0" y="250" width="400" height="56" fill="#8FD96A"/><rect x="0" y="300" width="400" height="100" fill="#5A5F6B"/>`,
+   [10,90,170,330].map(x=>`<rect x="${x}" y="378" width="50" height="10" fill="#fff" stroke-width="3"/>`).join(""),
+   {diff:3},
+   `<rect x="32" y="118" width="32" height="184" fill="#E6E9F2"/><path d="M10 118 H86 L78 76 H18Z" fill="#E6E9F2"/>
+    <rect x="22" y="62" width="52" height="14" rx="4" fill="#FF4D4D"/><path d="M48 62 V44" fill="none" stroke-width="4"/>`,
+   {diff:1},
+   `<rect x="366" y="170" width="6" height="84" fill="#777"/>`,
+   {diff:4},
+   `<path d="M212 262 L242 262 L274 222 L258 222Z" fill="#C9CED9"/>`,
+   {diff:0},
+   `<path d="M118 276 Q118 256 146 256 H306 Q342 258 356 276 Q342 292 306 292 H146 Q118 292 118 276Z" fill="#fff"/>
+    <path d="M318 262 Q338 264 348 272 H320Z" fill="#7FD8FF" stroke-width="3"/>` +
+    [170,194,218,242,266,290].map(x=>`<circle cx="${x}" cy="272" r="5" fill="#7FD8FF" stroke-width="3"/>`).join("") +
+   `<rect x="140" y="282" width="176" height="4" fill="#FF4D4D" stroke="none"/>
+    <path d="M204 284 L254 284 L222 330 L198 330Z" fill="#E6E9F2"/>
+    <circle cx="270" cy="300" r="8" fill="#2a2a30"/><circle cx="330" cy="298" r="7" fill="#2a2a30"/>`,
+   {diff:2}
+ ], diffs:[
+   { x:142, y:232, r:32, // uçağın kuyruğu
+     L:`<path d="M130 262 L112 200 H140 L178 262Z" fill="#FF4D4D"/>`,
+     R:`<path d="M130 262 L112 200 H140 L178 262Z" fill="#3D8BFF"/>` },
+   { x:48, y:96, r:30, // kontrol kulesinin camı
+     L:`<path d="M18 82 H78 L83 110 H13Z" fill="#7FD8FF" stroke-width="4"/>`,
+     R:`<path d="M18 82 H78 L83 110 H13Z" fill="#FFD93B" stroke-width="4"/>` },
+   { x:134, y:346, r:40, // bavul arabası
+     L:`<rect x="104" y="326" width="28" height="26" rx="4" fill="#A45CFF"/><rect x="136" y="318" width="32" height="34" rx="4" fill="#3FC35A"/>
+        <path d="M144 318 V312 H160 V318" fill="none" stroke-width="4"/>
+        <rect x="96" y="352" width="80" height="12" rx="3" fill="#FF9A2E"/><circle cx="108" cy="370" r="7" fill="#2a2a30"/><circle cx="164" cy="370" r="7" fill="#2a2a30"/>`,
+     R:"" },
+   { x:275, y:383, r:32, // yer çizgisi
+     L:`<rect x="250" y="378" width="50" height="10" fill="#fff" stroke-width="3"/>`,
+     R:"" },
+   { x:350, y:184, r:28, // rüzgâr tulumu
+     L:`<path d="M372 172 L326 180 L326 196 L372 190Z" fill="#FF9A2E"/><path d="M350 177 V193" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="butt"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 15: Deniz Kıyısı & Plaj (5 fark) ---------- */
+ { name:"Deniz Kıyısı & Plaj", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + sunRays(350,52,30,44,10,11,"#FFD93B") + `<circle cx="350" cy="52" r="26" fill="#FFD93B"/>`,
+   `<rect x="0" y="140" width="400" height="90" fill="#5CC8F0"/><path d="M20 176 Q35 168 50 176 M140 196 Q155 188 170 196 M270 170 Q285 162 300 170" fill="none" stroke="#fff" stroke-width="4"/>`,
+   `<path d="M0 225 Q200 205 400 225 V400 H0Z" fill="#F6D98B"/>`,
+   `<path d="M100 160 V302" fill="none" stroke-width="11"/><path d="M100 160 V300" fill="none" stroke="#8B5A2B" stroke-width="5"/>`,
+   {diff:1},
+   `<rect x="172" y="282" width="108" height="58" fill="#E8C27A"/>
+    <rect x="166" y="248" width="34" height="40" fill="#E8C27A"/><rect x="252" y="248" width="34" height="40" fill="#E8C27A"/><rect x="206" y="236" width="40" height="50" fill="#E8C27A"/>
+    <path d="M214 340 V314 Q226 300 238 314 V340Z" fill="#A0622D"/>
+    <path d="M226 236 V204" fill="none" stroke-width="4"/>`,
+   {diff:0},
+   {diff:4},
+   {diff:2},
+   {diff:3}
+ ], diffs:[
+   { x:238, y:212, r:24, // kum kalesinin bayrağı
+     L:`<path d="M226 204 L254 212 L226 220Z" fill="#FF4D4D" stroke-width="4"/>`,
+     R:`<path d="M226 204 L254 212 L226 220Z" fill="#3FC35A" stroke-width="4"/>` },
+   { x:100, y:140, r:42, // şemsiyenin deseni
+     L:`<path d="M28 162 Q100 80 172 162Z" fill="#FF4D4D"/><path d="M100 121 L60 162 H82Z M100 121 L118 162 H140Z" fill="#fff" stroke-width="4"/>`,
+     R:`<path d="M28 162 Q100 80 172 162Z" fill="#FF4D4D"/><circle cx="66" cy="150" r="7" fill="#fff" stroke="none"/><circle cx="100" cy="136" r="7" fill="#fff" stroke="none"/><circle cx="134" cy="150" r="7" fill="#fff" stroke="none"/><circle cx="84" cy="122" r="5" fill="#fff" stroke="none"/><circle cx="116" cy="122" r="5" fill="#fff" stroke="none"/>` },
+   { x:330, y:328, r:36, // yengeç
+     L:`<path d="M310 334 L292 344 M310 340 L296 354 M350 334 L368 344 M350 340 L364 354" fill="none" stroke-width="4"/>
+        <path d="M318 316 V300 M342 316 V300" fill="none" stroke-width="4"/><circle cx="318" cy="298" r="5" fill="#fff" stroke-width="3"/><circle cx="342" cy="298" r="5" fill="#fff" stroke-width="3"/>
+        <circle cx="296" cy="314" r="10" fill="#FF4D4D" stroke-width="4"/><circle cx="364" cy="314" r="10" fill="#FF4D4D" stroke-width="4"/>
+        <ellipse cx="330" cy="330" rx="26" ry="17" fill="#FF4D4D"/><path d="M322 334 Q330 340 338 334" fill="none" stroke-width="3"/>`,
+     R:"" },
+   { x:80, y:346, r:28, // deniz kabuğu
+     L:"",
+     R:`<path d="M58 362 Q58 330 80 326 Q102 330 102 362Z" fill="#FF8FB8"/><path d="M80 362 V330 M69 362 L72 332 M91 362 L88 332" fill="none" stroke-width="3"/>` },
+   { x:355, y:262, r:36, // can simidi
+     L:`<circle cx="355" cy="262" r="24" fill="none" stroke="#222" stroke-width="24"/><circle cx="355" cy="262" r="24" fill="none" stroke="#fff" stroke-width="15"/>
+        <circle cx="355" cy="262" r="24" fill="none" stroke="#FF4D4D" stroke-width="15" stroke-dasharray="18.85 18.85" stroke-linecap="butt"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 16: Büyülü Orman Evi (4 fark) ---------- */
+ { name:"Büyülü Orman Evi", layers:[
+   `<rect width="400" height="400" fill="#D9F0FF" stroke="none"/>`,
+   `<path d="M0 300 Q200 284 400 305 V400 H0Z" fill="#8FD96A"/>`,
+   `<rect x="30" y="120" width="50" height="190" fill="#8B5A2B"/>` + fluffy(55,96,44,32,9,"#2E8B3E") + `<ellipse cx="55" cy="200" rx="15" ry="19" fill="#3a2410"/>`,
+   {diff:0},
+   `<path d="M120 310 Q130 220 136 150 H264 Q270 220 280 310Z" fill="#A0622D"/>`,
+   fluffy(200,118,112,46,12,"#3FC35A"),
+   `<rect x="246" y="30" width="26" height="46" fill="#C0504D"/>`,
+   {diff:1},
+   {diff:3},
+   `<circle cx="160" cy="190" r="16" fill="#FFE66D"/><path d="M144 190 H176 M160 174 V206" fill="none" stroke-width="3"/>
+    <circle cx="242" cy="190" r="16" fill="#FFE66D"/><path d="M226 190 H258 M242 174 V206" fill="none" stroke-width="3"/>`,
+   `<rect x="175" y="244" width="50" height="66" rx="18" fill="#FFF3DD"/>
+    <path d="M158 252 Q160 212 200 210 Q240 212 242 252Z" fill="#FF4D4D"/>
+    <circle cx="182" cy="232" r="6" fill="#fff" stroke="none"/><circle cx="204" cy="224" r="5" fill="#fff" stroke="none"/><circle cx="224" cy="238" r="5" fill="#fff" stroke="none"/>`,
+   {diff:2},
+   `<ellipse cx="200" cy="330" rx="22" ry="8" fill="#C9CED9" stroke-width="4"/><ellipse cx="190" cy="358" rx="24" ry="9" fill="#C9CED9" stroke-width="4"/>`,
+   flower(320,330,"#FF8FB8",.8) + flower(365,352,"#A45CFF",.8) + flower(105,350,"#FFD93B",.8)
+ ], diffs:[
+   { x:55, y:200, r:26, // kovuktaki sincap
+     L:`<path d="M47 192 L45 182 L52 189Z M63 192 L65 182 L58 189Z" fill="#E08A45" stroke-width="3"/><circle cx="55" cy="202" r="11" fill="#E08A45" stroke-width="4"/>
+        <circle cx="51" cy="200" r="2.2" fill="#222" stroke="none"/><circle cx="59" cy="200" r="2.2" fill="#222" stroke="none"/><circle cx="55" cy="206" r="2" fill="#222" stroke="none"/>`,
+     R:"" },
+   { x:280, y:18, r:28, // bacadaki mor duman
+     L:`<circle cx="268" cy="20" r="10" fill="#C78BFF" stroke-width="4"/><circle cx="288" cy="12" r="13" fill="#C78BFF" stroke-width="4"/><circle cx="306" cy="24" r="9" fill="#C78BFF" stroke-width="4"/>`,
+     R:"" },
+   { x:212, y:280, r:22, // mantar kapının tokmağı
+     L:`<circle cx="212" cy="280" r="8" fill="none" stroke="#222" stroke-width="8"/><circle cx="212" cy="280" r="8" fill="none" stroke="#FFD93B" stroke-width="4"/>`,
+     R:"" },
+   { x:144, y:88, r:26, // çatıdaki sarı yaprak
+     L:`<path d="M126 98 Q138 70 162 76 Q154 102 126 98Z" fill="#FFD93B" stroke-width="4"/><path d="M130 96 Q144 86 158 78" fill="none" stroke-width="3"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 17: İtfaiye İstasyonu (5 fark) ---------- */
+ { name:"İtfaiye İstasyonu", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(80,60,.8),
+   `<rect x="180" y="96" width="212" height="208" fill="#FF6B6B"/><rect x="170" y="80" width="232" height="22" fill="#C0504D"/>
+    <rect x="200" y="116" width="76" height="44" rx="4" fill="#BFE9FF"/>
+    <rect x="300" y="120" width="60" height="44" rx="4" fill="#BFE9FF"/>
+    <rect x="312" y="216" width="50" height="88" fill="#A0622D"/><circle cx="352" cy="262" r="3.5" fill="#222" stroke="none"/>`,
+   {diff:4},
+   {diff:3},
+   `<rect x="0" y="300" width="400" height="100" fill="#5A5F6B"/><rect x="0" y="296" width="400" height="10" fill="#D9D9E3"/>`,
+   `<rect x="20" y="268" width="150" height="62" rx="8" fill="#FF4D4D"/>
+    <path d="M160 330 V242 Q160 230 172 230 H204 Q214 230 220 242 L236 270 V330Z" fill="#FF4D4D"/>
+    <path d="M176 242 H202 L216 268 H176Z" fill="#BFE9FF" stroke-width="4"/>
+    <rect x="20" y="300" width="216" height="8" fill="#fff" stroke="none"/>`,
+   {diff:0},
+   {diff:1},
+   `<path d="M95 316 Q92 360 34 366" fill="none" stroke-width="12"/><path d="M95 316 Q92 360 34 366" fill="none" stroke="#FF9A2E" stroke-width="6"/>
+    <circle cx="95" cy="290" r="18" fill="#FF9A2E"/><circle cx="95" cy="290" r="8" fill="#FFD93B" stroke-width="4"/>`,
+   {diff:2},
+   `<circle cx="62" cy="336" r="20" fill="#2a2a30"/><circle cx="200" cy="336" r="20" fill="#2a2a30"/>
+    <circle cx="62" cy="336" r="7" fill="#ddd" stroke="none"/><circle cx="200" cy="336" r="7" fill="#ddd" stroke="none"/>`
+ ], diffs:[
+   { x:90, y:259, r:40, zones:[[58,259,30],[122,259,30]], // merdiven
+     L:`<rect x="30" y="248" width="124" height="22" rx="3" fill="#E6E9F2"/><path d="M48 248 V270 M70 248 V270 M92 248 V270 M114 248 V270 M136 248 V270" fill="none" stroke-width="4"/>`,
+     R:"" },
+   { x:192, y:220, r:22, // siren lambası
+     L:`<path d="M178 230 Q178 210 192 210 Q206 210 206 230Z" fill="#3D8BFF"/>`,
+     R:`<path d="M178 230 Q178 210 192 210 Q206 210 206 230Z" fill="#FF9A2E"/>` },
+   { x:22, y:370, r:22, // hortumun ucu
+     L:`<path d="M36 362 L12 368 L14 380 L38 372Z" fill="#FFD93B" stroke-width="4"/>`,
+     R:"" },
+   { x:255, y:250, r:52, // garaj kapısı
+     L:`<rect x="200" y="184" width="104" height="116" fill="#FFD93B"/><path d="M200 212 H304 M200 240 H304 M200 268 H304" fill="none" stroke-width="4"/>`,
+     R:`<rect x="200" y="184" width="104" height="116" fill="#3D8BFF"/><path d="M200 212 H304 M200 240 H304 M200 268 H304" fill="none" stroke-width="4"/>` },
+   { x:330, y:142, r:30, // çatlak cam
+     L:"",
+     R:`<path d="M306 126 L324 142 L316 150 L338 160 M324 142 L344 132" fill="none" stroke-width="4"/>` }
+ ]},
+ /* ---------- Seviye 18: Neşeli Lunapark (5 fark) ---------- */
+ { name:"Neşeli Lunapark", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>`,
+   `<path d="M220 20 Q310 50 400 25" fill="none" stroke-width="3"/>` +
+     [[240,26,"#FF4D4D"],[280,34,"#FFD93B"],[360,33,"#3D8BFF"]].map(([x,y,c])=>`<path d="M${x-14} ${y} L${x+14} ${y} L${x} ${y+28}Z" fill="${c}" stroke-width="4"/>`).join(""),
+   {diff:3},
+   {diff:2},
+   `<path d="M0 300 Q200 288 400 302 V400 H0Z" fill="#8FD96A"/>`,
+   `<path d="M130 160 L76 304 M130 160 L184 304" fill="none" stroke-width="14"/><path d="M130 160 L76 304 M130 160 L184 304" fill="none" stroke="#A45CFF" stroke-width="7"/>`,
+   `<circle cx="130" cy="160" r="90" fill="none" stroke-width="12"/><circle cx="130" cy="160" r="90" fill="none" stroke="#FF8FB8" stroke-width="5"/>` +
+     [0,45,90,135].map(a=>{const c=Math.cos(a*RAD)*90, s=Math.sin(a*RAD)*90; return `<path d="M${r1(130-c)} ${r1(160-s)} L${r1(130+c)} ${r1(160+s)}" fill="none" stroke-width="4"/>`;}).join("") +
+     `<circle cx="130" cy="160" r="12" fill="#FFD93B"/>`,
+   [[0,"#FF4D4D"],[90,"#3FC35A"],[135,"#3D8BFF"],[180,"#FF9A2E"],[225,"#A45CFF"],[270,"#FFD93B"],[315,"#7FD8FF"]].map(([a,c])=>{
+     const x=r1(130+90*Math.cos(a*RAD)), y=r1(160+90*Math.sin(a*RAD)); return `<rect x="${x-14}" y="${y-4}" width="28" height="22" rx="6" fill="${c}" stroke-width="4"/>`; }).join(""),
+   {diff:0},
+   `<path d="M0 286 L43 250 L86 286Z" fill="#FF4D4D"/><rect x="8" y="284" width="70" height="76" fill="#FFD93B"/>`,
+   {diff:4},
+   {diff:1}
+ ], diffs:[
+   { x:194, y:103, r:24, // dönme dolabın kabini
+     L:`<rect x="180" y="92" width="28" height="22" rx="6" fill="#3FC35A" stroke-width="4"/>`,
+     R:"" },
+   { x:300, y:292, r:52, // pamuk şeker arabası
+     L:`<path d="M300 268 V230" fill="none" stroke-width="4"/>` + fluffy(300,222,18,14,7,"#FF8FB8") +
+       `<rect x="255" y="268" width="90" height="56" rx="6" fill="#FF8FB8"/><path d="M255 268 H345 L338 252 H262Z" fill="#fff"/>
+        <path d="M282 252 L278 268 M300 252 V268 M318 252 L322 268" fill="none" stroke-width="3"/>
+        <circle cx="272" cy="330" r="12" fill="#2a2a30"/><circle cx="328" cy="330" r="12" fill="#2a2a30"/>`,
+     R:"" },
+   { x:360, y:122, r:30, // uçan balon
+     L:`<path d="M360 148 Q352 170 362 190" fill="none" stroke-width="3"/><ellipse cx="360" cy="120" rx="22" ry="27" fill="#FF4D4D"/><path d="M354 146 L366 146 L360 154Z" fill="#FF4D4D" stroke-width="3"/>
+        <path d="M348 108 Q351 98 358 95" fill="none" stroke="#fff" stroke-width="4"/>`,
+     R:"" },
+   { x:320, y:48, r:24, // bayrak flaması
+     L:`<path d="M306 36 L334 36 L320 64Z" fill="#3FC35A" stroke-width="4"/>`,
+     R:`<path d="M306 36 L334 36 L320 64Z" fill="#A45CFF" stroke-width="4"/>` },
+   { x:43, y:312, r:26, // bilet gişesi penceresi
+     L:`<rect x="22" y="298" width="42" height="30" rx="4" fill="#BFE9FF"/><path d="M24 336 H62" fill="none" stroke-width="4"/>`,
+     R:`<rect x="22" y="298" width="42" height="30" rx="4" fill="#A0622D"/><path d="M43 298 V328" fill="none" stroke-width="4"/><path d="M24 336 H62" fill="none" stroke-width="4"/>` }
+ ]},
+ /* ---------- Seviye 19: Deniz Feneri & Gemiler (4 fark) ---------- */
+ { name:"Deniz Feneri & Gemiler", layers:[
+   `<rect width="400" height="400" fill="#4A5AB8" stroke="none"/>` +
+     [[30,30],[180,24],[230,140],[40,200],[140,90]].map(([x,y])=>`<path d="${starPath(x,y,6)}" fill="#FFE66D" stroke-width="3"/>`).join(""),
+   {diff:0},
+   `<rect x="0" y="250" width="400" height="150" fill="#2F86F0"/><path d="M20 290 Q35 282 50 290 M160 360 Q175 352 190 360 M60 380 Q75 372 90 380" fill="none" stroke="#fff" stroke-width="4"/>`,
+   `<path d="M240 400 V258 Q256 226 300 226 H400 V400Z" fill="#A3ABBA"/><path d="M262 300 Q280 290 300 300 M330 340 Q350 330 370 342" fill="none" stroke-width="4"/>`,
+   `<path d="M286 230 L296 92 H334 L344 230Z" fill="#fff"/><path d="M290 176 L340 176 L342 204 L288 204Z M294 120 L336 120 L338 146 L292 146Z" fill="#FF4D4D" stroke-width="4"/>
+    <rect x="292" y="64" width="46" height="30" rx="3" fill="#FFE66D"/><path d="M286 64 L315 40 L344 64Z" fill="#FF4D4D"/><rect x="306" y="198" width="18" height="32" rx="8" fill="#A0622D" stroke-width="4"/>`,
+   `<rect x="372" y="232" width="6" height="62" fill="#8B5A2B" stroke-width="3"/>`,
+   {diff:1},
+   `<path d="M110 300 V198" fill="none" stroke-width="5"/>
+    <path d="M114 206 L114 292 L172 292Z" fill="#fff"/><path d="M106 216 L106 292 L58 292Z" fill="#fff"/>
+    <path d="M48 298 H174 L152 330 H70Z" fill="#FF9A2E"/>`,
+   {diff:3},
+   {diff:2}
+ ], diffs:[
+   { x:210, y:78, r:46, zones:[[250,78,34],[180,78,40]], // fenerin ışık huzmesi
+     L:`<path d="M292 70 L150 36 L150 116 L292 86Z" fill="#FFF09A" fill-opacity=".92" stroke-width="3"/>`,
+     R:"" },
+   { x:375, y:262, r:28, // kıyıdaki can simidi
+     L:`<circle cx="375" cy="262" r="17" fill="none" stroke="#222" stroke-width="20"/><circle cx="375" cy="262" r="17" fill="none" stroke="#fff" stroke-width="12"/>
+        <circle cx="375" cy="262" r="17" fill="none" stroke="#FF4D4D" stroke-width="12" stroke-dasharray="13.35 13.35" stroke-linecap="butt"/>`,
+     R:"" },
+   { x:90, y:136, r:32, // martının kanadı
+     L:gull(true), R:gull(false) },
+   { x:122, y:205, r:22, // yelkenlinin bayrağı
+     L:`<path d="M110 196 L136 204 L110 212Z" fill="#FF4D4D" stroke-width="4"/>`,
+     R:`<path d="M110 196 L136 204 L110 212Z" fill="#3FC35A" stroke-width="4"/>` }
+ ]},
+ /* ---------- Seviye 20: Çikolata Fabrikası (5 fark) ---------- */
+ { name:"Çikolata Fabrikası", layers:[
+   `<rect width="400" height="400" fill="#FFE7D1" stroke="none"/><rect x="0" y="320" width="400" height="80" fill="#C98A4B"/>`,
+   `<rect x="-10" y="50" width="270" height="34" fill="#A3ABBA"/><rect x="226" y="50" width="34" height="112" fill="#A3ABBA"/><rect x="220" y="150" width="46" height="14" rx="3" fill="#8E97A8"/>`,
+   {diff:1},
+   {diff:2},
+   `<ellipse cx="330" cy="236" rx="40" ry="40" fill="#fff"/>
+    <circle cx="304" cy="148" r="13" fill="#2a2a30"/><circle cx="356" cy="148" r="13" fill="#2a2a30"/>
+    <circle cx="330" cy="172" r="34" fill="#fff"/>
+    <ellipse cx="316" cy="170" rx="9" ry="12" transform="rotate(25 316 170)" fill="#2a2a30" stroke="none"/><ellipse cx="344" cy="170" rx="9" ry="12" transform="rotate(-25 344 170)" fill="#2a2a30" stroke="none"/>
+    <circle cx="317" cy="169" r="3" fill="#fff" stroke="none"/><circle cx="343" cy="169" r="3" fill="#fff" stroke="none"/>
+    <ellipse cx="330" cy="184" rx="5" ry="3.5" fill="#222"/><path d="M322 192 Q330 198 338 192" fill="none" stroke-width="3"/>`,
+   {diff:3},
+   `<rect x="58" y="276" width="14" height="50" fill="#777"/><rect x="328" y="276" width="14" height="50" fill="#777"/>
+    <rect x="20" y="250" width="360" height="26" rx="13" fill="#555"/>` + [40,120,200,280,360].map(x=>`<circle cx="${x}" cy="263" r="8" fill="#A3ABBA" stroke-width="3"/>`).join(""),
+   [50,130,290].map(x=>bar(x)).join(""),
+   {diff:0},
+   `<rect x="50" y="330" width="64" height="50" fill="#3FC35A"/><rect x="74" y="330" width="16" height="50" fill="#FFD93B" stroke-width="4"/>
+    <path d="M82 330 Q62 306 56 322 Q58 334 82 330Z M82 330 Q102 306 108 322 Q106 334 82 330Z" fill="#FFD93B" stroke-width="4"/>`,
+   {diff:4}
+ ], diffs:[
+   { x:235, y:237, r:30, // banttaki çikolata
+     L:bar(210), R:"" },
+   { x:110, y:67, r:26, // vananın rengi
+     L:valve("#FF4D4D"), R:valve("#3D8BFF") },
+   { x:243, y:184, r:26, // borudan akan krema
+     L:`<path d="M230 164 H256 Q258 192 249 202 Q243 212 237 202 Q228 192 230 164Z" fill="#FFF8E7"/>`,
+     R:"" },
+   { x:330, y:110, r:30, // aşçı şapkası
+     L:`<rect x="306" y="114" width="48" height="24" rx="4" fill="#fff"/>` + fluffy(330,102,26,14,7,"#fff"),
+     R:"" },
+   { x:120, y:320, r:24, // hediye etiketi
+     L:`<path d="M96 330 L112 318" fill="none" stroke-width="3"/><rect x="108" y="304" width="34" height="22" rx="4" transform="rotate(-15 125 315)" fill="#fff"/><circle cx="113" cy="316" r="3" fill="#FF4D4D" stroke="none"/><path d="M120 316 H136" fill="none" stroke="#FF4D4D" stroke-width="4" transform="rotate(-15 125 315)"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 21: Safari Macerası (5 fark) ---------- */
+ { name:"Safari Macerası", layers:[
+   `<rect width="400" height="400" fill="#FFE6A8" stroke="none"/>` + sunRays(220,60,30,44,10,11,"#FF9A2E") + `<circle cx="220" cy="60" r="26" fill="#FF9A2E"/>`,
+   `<path d="M0 250 Q200 236 400 252 V400 H0Z" fill="#E8C27A"/>`,
+   {diff:4},
+   `<path d="M325 252 L330 168 L340 168 L346 252Z" fill="#8B5A2B"/><ellipse cx="336" cy="160" rx="56" ry="18" fill="#3FC35A"/>`,
+   `<rect x="68" y="228" width="13" height="74" rx="5" fill="#FFD93B"/><rect x="118" y="228" width="13" height="74" rx="5" fill="#FFD93B"/>
+    <path d="M58 214 Q44 222 46 236" fill="none" stroke-width="4"/>
+    <ellipse cx="100" cy="220" rx="46" ry="25" fill="#FFD93B"/>
+    <path d="M118 212 L138 92 L160 98 L146 218Z" fill="#FFD93B"/>
+    <path d="M150 66 L148 52 M166 66 L168 52" fill="none" stroke-width="4"/><circle cx="148" cy="50" r="5" fill="#A0622D" stroke-width="3"/><circle cx="168" cy="50" r="5" fill="#A0622D" stroke-width="3"/>
+    <ellipse cx="164" cy="82" rx="24" ry="15" fill="#FFD93B"/><circle cx="162" cy="76" r="3.5" fill="#222" stroke="none"/><path d="M180 88 h0" fill="none" stroke-width="5"/>
+    <circle cx="84" cy="212" r="8" fill="#A0622D" stroke-width="3"/><circle cx="112" cy="228" r="7" fill="#A0622D" stroke-width="3"/><circle cx="118" cy="206" r="6" fill="#A0622D" stroke-width="3"/><circle cx="146" cy="180" r="6" fill="#A0622D" stroke-width="3"/>`,
+   {diff:0},
+   `<path d="M298 222 Q316 214 316 196" fill="none" stroke-width="4"/><circle cx="316" cy="194" r="6" fill="#C8763A" stroke-width="3"/>
+    <rect x="236" y="232" width="12" height="30" rx="5" fill="#FFB84D"/><rect x="280" y="232" width="12" height="30" rx="5" fill="#FFB84D"/>
+    <ellipse cx="262" cy="226" rx="40" ry="22" fill="#FFB84D"/>`,
+   {diff:1},
+   `<circle cx="222" cy="198" r="21" fill="#FFB84D"/><circle cx="215" cy="193" r="3" fill="#222" stroke="none"/><circle cx="229" cy="193" r="3" fill="#222" stroke="none"/>
+    <ellipse cx="222" cy="203" rx="5" ry="3.5" fill="#222"/><path d="M216 209 Q222 214 228 209" fill="none" stroke-width="3"/>`,
+   `<ellipse cx="56" cy="348" rx="40" ry="24" fill="#A3ABBA"/><path d="M40 340 Q50 332 60 338" fill="none" stroke-width="3"/>`,
+   {diff:3},
+   `<path d="M262 322 V298 Q262 292 268 292 H336 L352 322Z" fill="#3FC35A"/><path d="M272 318 V300 H300 V318Z M308 318 V300 H332 L344 318Z" fill="#BFE9FF" stroke-width="4"/>
+    <rect x="240" y="320" width="132" height="40" rx="8" fill="#3FC35A"/><rect x="244" y="330" width="16" height="10" rx="3" fill="#FFD93B" stroke-width="3"/>
+    <circle cx="270" cy="362" r="16" fill="#2a2a30"/><circle cx="345" cy="362" r="16" fill="#2a2a30"/><circle cx="270" cy="362" r="6" fill="#ddd" stroke="none"/><circle cx="345" cy="362" r="6" fill="#ddd" stroke="none"/>`,
+   {diff:2}
+ ], diffs:[
+   { x:140, y:142, r:22, // zürafanın beneği
+     L:`<circle cx="140" cy="142" r="8" fill="#A0622D" stroke-width="3"/>`, R:"" },
+   { x:222, y:198, r:40, // aslanın yelesi
+     L:fluffy(222,198,32,32,10,"#C8763A"), R:"" },
+   { x:300, y:284, r:22, // cipin tavan farı
+     L:`<rect x="284" y="284" width="34" height="8" fill="#555" stroke-width="3"/><circle cx="292" cy="280" r="7" fill="#FFD93B" stroke-width="3"/><circle cx="310" cy="280" r="7" fill="#FFD93B" stroke-width="3"/>`,
+     R:"" },
+   { x:110, y:358, r:22, // kaya parçası
+     L:`<ellipse cx="110" cy="360" rx="15" ry="10" fill="#A3ABBA" stroke-width="4"/>`, R:"" },
+   { x:298, y:180, r:26, // uzaktaki ağaç dalı
+     L:`<path d="M332 204 L298 182" fill="none" stroke-width="9"/><path d="M332 204 L298 182" fill="none" stroke="#8B5A2B" stroke-width="4"/><ellipse cx="290" cy="178" rx="22" ry="9" fill="#3FC35A" stroke-width="4"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 22: Kar Kış Eğlencesi (4 fark) ---------- */
+ { name:"Kar Kış Eğlencesi", layers:[
+   `<rect width="400" height="400" fill="#CFE8FA" stroke="none"/>` +
+     [[40,40],[150,60],[240,30],[200,120],[60,130],[380,170]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" fill="#fff" stroke-width="3"/>`).join(""),
+   `<path d="M0 240 Q200 220 400 245 V400 H0Z" fill="#fff"/>`,
+   `<rect x="312" y="230" width="18" height="34" fill="#8B5A2B"/>
+    <path d="M321 50 L282 120 H360Z" fill="#2E8B3E"/><path d="M321 90 L270 170 H372Z" fill="#2E8B3E"/><path d="M321 130 L258 236 H384Z" fill="#2E8B3E"/>
+    <circle cx="300" cy="150" r="6" fill="#FF4D4D" stroke-width="3"/><circle cx="340" cy="196" r="6" fill="#3D8BFF" stroke-width="3"/><circle cx="296" cy="214" r="6" fill="#FFD93B" stroke-width="3"/>`,
+   {diff:2},
+   `<circle cx="100" cy="322" r="50" fill="#fff"/><circle cx="100" cy="242" r="36" fill="#fff"/><circle cx="100" cy="182" r="27" fill="#fff"/>
+    <rect x="80" y="134" width="40" height="30" rx="3" fill="#2a2a30"/><rect x="70" y="160" width="60" height="8" rx="3" fill="#2a2a30"/>
+    <circle cx="91" cy="176" r="3.5" fill="#222" stroke="none"/><circle cx="109" cy="176" r="3.5" fill="#222" stroke="none"/>
+    <path d="M90 196 Q100 202 110 196" fill="none" stroke-width="3"/>
+    <path d="M72 212 Q100 224 128 212 L128 222 Q100 234 72 222Z" fill="#FF4D4D" stroke-width="4"/>
+    <circle cx="100" cy="240" r="4" fill="#222" stroke="none"/><circle cx="100" cy="258" r="4" fill="#222" stroke="none"/>
+    <path d="M66 236 L36 214 M134 236 L164 214" fill="none" stroke="#8B5A2B" stroke-width="5"/>`,
+   {diff:0},
+   `<path d="M186 276 H254" fill="none" stroke-width="10"/><path d="M186 276 H254" fill="none" stroke="#FF4D4D" stroke-width="5"/>
+    <path d="M200 226 L190 270 M240 226 L252 270" fill="none" stroke-width="4"/>
+    <rect x="208" y="244" width="10" height="30" rx="4" fill="#2C3E8F"/><rect x="222" y="244" width="10" height="30" rx="4" fill="#2C3E8F"/>
+    <rect x="204" y="206" width="32" height="42" rx="10" fill="#3D8BFF"/>
+    <circle cx="220" cy="190" r="18" fill="#FFD2A6"/><circle cx="214" cy="190" r="2.6" fill="#222" stroke="none"/><circle cx="226" cy="190" r="2.6" fill="#222" stroke="none"/>
+    <path d="M214 198 Q220 203 226 198" fill="none" stroke-width="3"/>`,
+   {diff:1},
+   {diff:3}
+ ], diffs:[
+   { x:112, y:187, r:20, // havuç burun
+     L:`<path d="M100 182 L130 188 L100 193Z" fill="#FF9A2E" stroke-width="4"/>`, R:"" },
+   { x:220, y:176, r:24, // kayakçının beresi
+     L:`<path d="M201 186 Q202 164 220 164 Q238 164 239 186Z" fill="#FF4D4D"/><circle cx="220" cy="160" r="6" fill="#fff" stroke-width="4"/>`, R:"" },
+   { x:321, y:44, r:26, // çam ağacındaki yıldız
+     L:`<path d="${starPath(321,44,20)}" fill="#FFD93B"/>`, R:"" },
+   { x:238, y:340, r:44, // tahta kızak
+     L:`<path d="M184 330 V346 M276 330 V346" fill="none" stroke-width="5"/><rect x="180" y="320" width="104" height="16" rx="4" fill="#C98A4B"/>
+        <path d="M174 352 H282 Q298 352 296 336" fill="none" stroke-width="10"/><path d="M174 352 H282 Q298 352 296 336" fill="none" stroke="#FF4D4D" stroke-width="5"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 23: Su Parkı & Kaydırak (5 fark) ---------- */
+ { name:"Su Parkı & Kaydırak", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/><circle cx="210" cy="48" r="24" fill="#FFD93B"/>` + cloud(140,80,.6),
+   `<rect x="0" y="230" width="400" height="170" fill="#FFE7C2"/>`,
+   `<rect x="14" y="246" width="372" height="140" rx="22" fill="#fff"/><rect x="24" y="256" width="352" height="120" rx="16" fill="#5CC8F0"/>
+    <path d="M60 300 Q75 292 90 300 M180 350 Q195 342 210 350 M300 340 Q315 332 330 340" fill="none" stroke="#fff" stroke-width="4"/>`,
+   `<rect x="20" y="96" width="62" height="150" fill="#FF9A2E"/><rect x="14" y="88" width="74" height="14" rx="4" fill="#C95F00"/>
+    <path d="M30 120 H72 M30 150 H72 M30 180 H72 M30 210 H72" fill="none" stroke-width="4"/>`,
+   {diff:0},
+   `<ellipse cx="270" cy="306" rx="26" ry="9" fill="#A3ABBA" stroke-width="4"/>`,
+   {diff:1},
+   {diff:2},
+   {diff:3},
+   `<rect x="327" y="156" width="8" height="74" fill="#777"/>`,
+   {diff:4}
+ ], diffs:[
+   { x:140, y:196, r:70, zones:[[96,138,30],[142,196,34],[186,250,30]], // dev kaydırak
+     L:slide("#FFD93B"), R:slide("#FF4D4D") },
+   { x:270, y:268, r:34, // fıskiye suyu
+     L:`<path d="M270 304 Q248 240 228 296 M270 304 Q292 240 312 296 M270 304 V250" fill="none" stroke-width="10"/>
+        <path d="M270 304 Q248 240 228 296 M270 304 Q292 240 312 296 M270 304 V250" fill="none" stroke="#DFF6FF" stroke-width="5"/>`,
+     R:"" },
+   { x:112, y:312, r:34, // şişme ördek
+     L:`<ellipse cx="108" cy="322" rx="32" ry="17" fill="#FFD93B"/><circle cx="130" cy="296" r="15" fill="#FFD93B"/>
+        <path d="M144 294 L158 298 L144 304Z" fill="#FF9A2E" stroke-width="3"/><circle cx="133" cy="291" r="3" fill="#222" stroke="none"/>
+        <path d="M90 316 Q104 306 118 318" fill="none" stroke-width="3"/>`,
+     R:"" },
+   { x:352, y:264, r:28, // havuz merdiveni
+     L:`<path d="M340 232 Q340 220 350 222 V296 M364 232 Q364 220 374 222 V296" fill="none" stroke-width="10"/>
+        <path d="M340 232 Q340 220 350 222 V296 M364 232 Q364 220 374 222 V296" fill="none" stroke="#E6E9F2" stroke-width="5"/>
+        <path d="M350 254 H374 M350 278 H374" fill="none" stroke-width="5"/>`,
+     R:"" },
+   { x:331, y:134, r:32, // tabela
+     L:`<rect x="290" y="110" width="82" height="46" rx="6" fill="#3D8BFF"/><path d="M300 134 Q310 124 320 134 Q330 144 340 134 Q350 124 360 134" fill="none" stroke="#fff" stroke-width="5"/>`,
+     R:`<rect x="290" y="110" width="82" height="46" rx="6" fill="#3FC35A"/><path d="${starPath(331,133,14)}" fill="#FFD93B" stroke-width="3"/>` }
+ ]},
+ /* ---------- Seviye 24: Sanat Atölyesi (4 fark) ---------- */
+ { name:"Sanat Atölyesi", layers:[
+   `<rect width="400" height="400" fill="#FFF1D6" stroke="none"/><rect x="0" y="300" width="400" height="100" fill="#E0A867"/><path d="M0 345 H400" fill="none" stroke-width="3"/>`,
+   `<rect x="250" y="40" width="110" height="80" rx="8" fill="#BFE9FF"/><path d="M305 40 V120 M250 80 H360" fill="none" stroke-width="5"/>`,
+   `<path d="M110 340 L150 100 M190 340 L150 100 M150 230 V352" fill="none" stroke-width="12"/><path d="M110 340 L150 100 M190 340 L150 100 M150 230 V352" fill="none" stroke="#A0622D" stroke-width="6"/>
+    <rect x="96" y="222" width="108" height="12" rx="3" fill="#A0622D"/>`,
+   `<rect x="90" y="106" width="120" height="114" rx="4" fill="#fff"/><circle cx="180" cy="142" r="14" fill="#FFD93B" stroke-width="4"/>`,
+   {diff:0},
+   `<rect x="228" y="230" width="164" height="16" rx="3" fill="#A0622D"/><rect x="240" y="246" width="12" height="62" fill="#A0622D"/><rect x="368" y="246" width="12" height="62" fill="#A0622D"/>`,
+   `<path d="M252 186 L244 150 M262 186 V146 M272 186 L282 152" fill="none" stroke-width="5"/>
+    <circle cx="244" cy="148" r="5" fill="#FF4D4D" stroke-width="3"/><circle cx="262" cy="144" r="5" fill="#3D8BFF" stroke-width="3"/><circle cx="282" cy="150" r="5" fill="#FFD93B" stroke-width="3"/>
+    <rect x="242" y="184" width="40" height="46" rx="4" fill="#DFF6FF"/>`,
+   {diff:1},
+   {diff:3},
+   `<path d="M246 330 Q240 300 280 298 Q340 296 352 318 Q360 344 320 352 Q290 358 284 344 Q280 334 268 342 Q250 350 246 330Z" fill="#E8C27A"/>
+    <ellipse cx="268" cy="326" rx="7" ry="5" fill="#FFF1D6" stroke-width="3"/>
+    <circle cx="292" cy="312" r="9" fill="#FF4D4D" stroke-width="3"/><circle cx="318" cy="310" r="9" fill="#FFD93B" stroke-width="3"/><circle cx="338" cy="324" r="9" fill="#3D8BFF" stroke-width="3"/>`,
+   {diff:2}
+ ], diffs:[
+   { x:150, y:178, r:50, // resmin rengi
+     L:`<path d="M96 214 Q150 156 204 214Z" fill="#3FC35A" stroke-width="4"/>`,
+     R:`<path d="M96 214 Q150 156 204 214Z" fill="#A45CFF" stroke-width="4"/>` },
+   { x:312, y:212, r:22, // kutudaki boya
+     L:`<rect x="296" y="198" width="32" height="32" rx="4" fill="#FF4D4D"/><ellipse cx="312" cy="200" rx="16" ry="5" fill="#C0504D" stroke-width="3"/>`,
+     R:`<rect x="296" y="198" width="32" height="32" rx="4" fill="#3FC35A"/><ellipse cx="312" cy="200" rx="16" ry="5" fill="#2E8B3E" stroke-width="3"/>` },
+   { x:318, y:340, r:20, // paletin bir rengi
+     L:`<circle cx="318" cy="338" r="9" fill="#3FC35A" stroke-width="3"/>`,
+     R:`<circle cx="318" cy="338" r="9" fill="#A45CFF" stroke-width="3"/>` },
+   { x:365, y:196, r:30, // masadaki vazo
+     L:`<path d="M365 186 V160" fill="none" stroke="#2E8B3E" stroke-width="5"/><path d="${starPath(365,156,13,6)}" fill="#FF8FB8" stroke-width="3"/>
+        <path d="M352 230 Q346 208 356 196 V186 H374 V196 Q384 208 378 230Z" fill="#7FD8FF"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 25: Şato & Kale Bahçesi (5 fark) ---------- */
+ { name:"Şato & Kale Bahçesi", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(200,46,.7),
+   `<rect x="0" y="290" width="400" height="110" fill="#8FD96A"/>`,
+   `<path d="M100 150 V130 h20 v12 h20 v-12 h20 v12 h20 v-12 h20 v12 h20 v-12 h20 v12 h20 v-12 h20 V150Z" fill="#C9CED9"/>
+    <rect x="100" y="148" width="200" height="152" fill="#C9CED9"/>
+    <rect x="60" y="110" width="60" height="190" fill="#B5BCCB"/><rect x="280" y="110" width="60" height="190" fill="#B5BCCB"/>
+    <path d="M52 112 L90 50 L128 112Z M272 112 L310 50 L348 112Z" fill="#3D8BFF"/>
+    <rect x="300" y="160" width="20" height="30" rx="10" fill="#2a2a30"/>
+    <path d="M160 300 V232 Q200 192 240 232 V300Z" fill="#2a2a30"/>
+    <path d="M310 50 V22" fill="none" stroke-width="4"/>`,
+   {diff:0},
+   {diff:2},
+   {diff:4},
+   `<rect x="0" y="318" width="400" height="30" fill="#5CC8F0"/>`,
+   `<path d="M160 300 H240 L252 342 H148Z" fill="#A0622D"/><path d="M168 314 H232 M160 328 H240" fill="none" stroke-width="3"/>`,
+   {diff:1},
+   fluffy(40,368,30,18,8,"#3FC35A"),
+   {diff:3}
+ ], diffs:[
+   { x:322, y:30, r:22, // kalenin bayrağı
+     L:`<path d="M310 22 L338 30 L310 38Z" fill="#FF4D4D" stroke-width="4"/>`,
+     R:`<path d="M310 22 L338 30 L310 38Z" fill="#FFD93B" stroke-width="4"/>` },
+   { x:200, y:282, r:62, zones:[[156,280,28],[244,280,28]], // asma köprü zinciri
+     L:`<path d="M160 222 L150 338 M240 222 L250 338" fill="none" stroke-width="7" stroke-dasharray="8 6" stroke-linecap="butt"/>`,
+     R:"" },
+   { x:90, y:172, r:24, // kuledeki pencere
+     L:`<rect x="80" y="158" width="20" height="30" rx="10" fill="#2a2a30"/>`,
+     R:`<rect x="80" y="158" width="20" height="30" rx="10" fill="#FFD93B"/>` },
+   { x:350, y:368, r:32, // gül fidanı
+     L:fluffy(350,370,30,18,8,"#2E8B3E") + `<circle cx="336" cy="362" r="7" fill="#FF4D4D" stroke-width="3"/><circle cx="356" cy="356" r="7" fill="#FF4D4D" stroke-width="3"/><circle cx="364" cy="374" r="7" fill="#FF4D4D" stroke-width="3"/>`,
+     R:"" },
+   { x:200, y:178, r:24, // kalkan amblemi
+     L:`<path d="M184 160 H216 V178 Q216 194 200 202 Q184 194 184 178Z" fill="#FF4D4D"/><path d="${starPath(200,178,9)}" fill="#FFD93B" stroke-width="3"/>`,
+     R:`<path d="M184 160 H216 V178 Q216 194 200 202 Q184 194 184 178Z" fill="#3D8BFF"/><path d="${starPath(200,178,9)}" fill="#FFD93B" stroke-width="3"/>` }
+ ]},
+ /* ---------- Seviye 26: Müzik Odası (4 fark) ---------- */
+ { name:"Müzik Odası", layers:[
+   `<rect width="400" height="400" fill="#FFF1D6" stroke="none"/><rect x="0" y="300" width="400" height="100" fill="#E0A867"/><path d="M0 345 H400" fill="none" stroke-width="3"/>`,
+   {diff:1},
+   `<rect x="30" y="236" width="12" height="66" fill="#6B3A1E"/><rect x="148" y="236" width="12" height="66" fill="#6B3A1E"/>
+    <rect x="20" y="118" width="150" height="86" rx="6" fill="#6B3A1E"/><rect x="62" y="128" width="56" height="40" rx="3" fill="#fff" stroke-width="4"/>
+    <path d="M72 140 H108 M72 152 H100" fill="none" stroke-width="3"/>
+    <rect x="20" y="200" width="150" height="42" fill="#fff"/>
+    <rect x="30" y="204" width="26" height="34" fill="#fff" stroke-width="3"/><rect x="56" y="204" width="26" height="34" fill="#fff" stroke-width="3"/>
+    <rect x="108" y="204" width="26" height="34" fill="#fff" stroke-width="3"/><rect x="134" y="204" width="26" height="34" fill="#fff" stroke-width="3"/>`,
+   {diff:0},
+   [50,76,128,154].map(x=>`<rect x="${x-6}" y="204" width="12" height="20" rx="2" fill="#222" stroke-width="2"/>`).join(""),
+   {diff:3},
+   `<path d="M330 104 V124" fill="none" stroke-width="4"/><circle cx="330" cy="102" r="4" fill="#777" stroke-width="3"/>
+    <rect x="324" y="96" width="12" height="62" rx="4" fill="#6B3A1E"/>
+    <ellipse cx="330" cy="200" rx="26" ry="28" fill="#C8763A"/><ellipse cx="330" cy="156" rx="20" ry="22" fill="#C8763A"/>
+    <path d="M320 178 Q314 186 320 194 M340 178 Q346 186 340 194" fill="none" stroke-width="3"/><path d="M330 140 V222" fill="none" stroke-width="2"/>
+    <rect x="320" y="220" width="20" height="8" rx="2" fill="#2a2a30" stroke-width="3"/>`,
+   `<rect x="250" y="300" width="100" height="48" fill="#FF4D4D"/><path d="M250 300 L275 348 L300 300 L325 348 L350 300" fill="none" stroke="#fff" stroke-width="4"/>
+    <ellipse cx="300" cy="300" rx="50" ry="14" fill="#fff"/>
+    <path d="M262 268 L300 296 M338 268 L300 296" fill="none" stroke-width="9"/><path d="M262 268 L300 296 M338 268 L300 296" fill="none" stroke="#E8C27A" stroke-width="4"/>`,
+   {diff:2}
+ ], diffs:[
+   { x:95, y:224, r:22, // piyanonun tuşu
+     L:`<rect x="82" y="204" width="26" height="34" fill="#fff" stroke-width="3"/>`,
+     R:`<rect x="82" y="204" width="26" height="34" fill="#FFD93B" stroke-width="3"/>` },
+   { x:200, y:72, r:30, // duvardaki nota
+     L:`<ellipse cx="190" cy="92" rx="12" ry="9" transform="rotate(-20 190 92)" fill="#A45CFF"/><path d="M200 88 V48 Q214 52 222 66" fill="none" stroke-width="5"/>`,
+     R:"" },
+   { x:300, y:348, r:34, zones:[[272,348,24],[328,348,24]], // davulun kasnağı
+     L:`<rect x="246" y="342" width="108" height="12" rx="4" fill="#FFD93B"/>`,
+     R:`<rect x="246" y="342" width="108" height="12" rx="4" fill="#3D8BFF"/>` },
+   { x:336, y:166, r:52, zones:[[300,124,24],[372,208,24]], // kemanın yayı
+     L:`<path d="M292 112 L380 220" fill="none" stroke-width="9"/><path d="M292 112 L380 220" fill="none" stroke="#A0622D" stroke-width="4"/><path d="M296 108 L384 216" fill="none" stroke-width="2"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 27: Denizaltı Keşfi (5 fark) ---------- */
+ { name:"Denizaltı Keşfi", layers:[
+   `<rect width="400" height="400" fill="#3A7BD5" stroke="none"/><rect width="400" height="110" fill="#5C9BE8" stroke="none"/>`,
+   {diff:3},
+   `<path d="M0 320 Q200 300 400 322 V400 H0Z" fill="#F6D98B"/>`,
+   `<path d="M370 324 Q352 280 370 240 L382 242 Q368 282 386 324Z" fill="#3FC35A"/><path d="M150 312 Q140 290 150 270 L160 272 Q152 292 162 312Z" fill="#3FC35A"/>`,
+   {diff:2},
+   {diff:4},
+   `<path d="M80 190 L58 168 V212Z" fill="#A3ABBA"/><path d="M58 168 L48 160 M58 212 L48 220" fill="none" stroke-width="4"/>`,
+   {diff:0},
+   `<rect x="160" y="112" width="62" height="42" rx="10" fill="#FFD93B"/>
+    <ellipse cx="195" cy="190" rx="112" ry="50" fill="#FFD93B"/>
+    <circle cx="135" cy="190" r="18" fill="#BFE9FF"/><circle cx="195" cy="190" r="18" fill="#BFE9FF"/><circle cx="255" cy="190" r="18" fill="#BFE9FF"/>`,
+   {diff:1}
+ ], diffs:[
+   { x:212, y:92, r:24, // periskop
+     L:`<path d="M200 114 V82 H224 V92" fill="none" stroke-width="13"/><path d="M200 114 V82 H224 V92" fill="none" stroke="#A3ABBA" stroke-width="6"/>`,
+     R:"" },
+   { x:255, y:190, r:22, // penceredeki balık
+     L:`<path d="M264 190 L272 183 V197Z" fill="#FF9A2E" stroke-width="3"/><ellipse cx="253" cy="190" rx="11" ry="7" fill="#FF9A2E" stroke-width="3"/><circle cx="248" cy="188" r="1.8" fill="#222" stroke="none"/>`,
+     R:"" },
+   { x:60, y:322, r:32, // mercan
+     L:`<path d="M54 350 V320 Q54 296 40 290 M54 320 Q66 300 80 296 M54 334 Q38 328 32 314" fill="none" stroke-width="13"/>
+        <path d="M54 350 V320 Q54 296 40 290 M54 320 Q66 300 80 296 M54 334 Q38 328 32 314" fill="none" stroke="#FF8FB8" stroke-width="7"/>`,
+     R:"" },
+   { x:302, y:96, r:32, // hava kabarcıkları
+     L:`<circle cx="292" cy="122" r="9" fill="#DFF6FF" stroke-width="4"/><circle cx="308" cy="96" r="12" fill="#DFF6FF" stroke-width="4"/><circle cx="296" cy="68" r="7" fill="#DFF6FF" stroke-width="4"/>`,
+     R:"" },
+   { x:318, y:340, r:34, // hazine sandığı
+     L:`<rect x="290" y="328" width="56" height="34" rx="4" fill="#A0622D"/><path d="M290 336 Q318 306 346 336Z" fill="#C8763A"/><rect x="312" y="332" width="12" height="12" rx="2" fill="#FFD93B" stroke-width="3"/>`,
+     R:`<rect x="290" y="328" width="56" height="34" rx="4" fill="#A0622D"/><path d="M290 326 L296 296 H340 L346 326Z" fill="#C8763A"/>
+        <circle cx="306" cy="326" r="8" fill="#FFD93B" stroke-width="3"/><circle cx="322" cy="322" r="8" fill="#FFD93B" stroke-width="3"/><circle cx="336" cy="328" r="7" fill="#FFD93B" stroke-width="3"/>` }
+ ]},
+ /* ---------- Seviye 28: Uçan Balon Festivali (5 fark) ---------- */
+ { name:"Uçan Balon Festivali", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>`,
+   {diff:2},
+   `<path d="M0 330 Q200 312 400 334 V400 H0Z" fill="#8FD96A"/>`,
+   `<path d="M70 150 L62 176 M70 150 L78 176" fill="none" stroke-width="3"/><ellipse cx="70" cy="122" rx="30" ry="34" fill="#3D8BFF"/><rect x="60" y="174" width="20" height="16" rx="3" fill="#C98A4B" stroke-width="4"/>
+    <path d="M330 236 L322 260 M330 236 L338 260" fill="none" stroke-width="3"/><ellipse cx="330" cy="212" rx="26" ry="30" fill="#A45CFF"/><rect x="321" y="258" width="18" height="14" rx="3" fill="#C98A4B" stroke-width="4"/>`,
+   {diff:3},
+   `<path d="M180 250 L184 268 M220 250 L216 268" fill="none" stroke-width="3"/>
+    <path d="M200 70 C130 70 116 150 150 200 Q168 228 180 250 H220 Q232 228 250 200 C284 150 270 70 200 70Z" fill="#FF4D4D"/>`,
+   {diff:0},
+   `<rect x="180" y="266" width="40" height="30" rx="4" fill="#C98A4B"/><path d="M180 278 H220" fill="none" stroke-width="3"/>`,
+   {diff:1},
+   `<path d="M340 360 V292" fill="none" stroke-width="5"/>`,
+   {diff:4}
+ ], diffs:[
+   { x:200, y:160, r:40, // balonun şeridi
+     L:`<path d="M200 72 C180 104 176 190 190 250 H210 C224 190 220 104 200 72Z" fill="#FFD93B"/>`,
+     R:`<path d="M200 72 C180 104 176 190 190 250 H210 C224 190 220 104 200 72Z" fill="#3FC35A"/>` },
+   { x:200, y:292, r:30, zones:[[174,294,18],[226,294,18]], // kum torbaları
+     L:`<path d="M180 282 L174 288 M220 282 L226 288" fill="none" stroke-width="3"/><ellipse cx="174" cy="296" rx="9" ry="11" fill="#E8C27A" stroke-width="4"/><ellipse cx="226" cy="296" rx="9" ry="11" fill="#E8C27A" stroke-width="4"/>`,
+     R:"" },
+   { x:322, y:70, r:42, // bulut
+     L:cloud(322,70,1), R:"" },
+   { x:100, y:256, r:30, // kuş sürüsü
+     L:`<path d="M80 250 Q86 242 92 250 Q98 242 104 250 M100 268 Q106 260 112 268 Q118 260 124 268 M106 236 Q111 230 116 236 Q121 230 126 236" fill="none" stroke-width="4"/>`,
+     R:"" },
+   { x:356, y:304, r:24, // flama bayrak
+     L:`<path d="M340 292 L376 304 L340 316Z" fill="#FF9A2E" stroke-width="4"/>`,
+     R:`<path d="M340 292 L376 304 L340 316Z" fill="#A45CFF" stroke-width="4"/>` }
+ ]},
+ /* ---------- Seviye 29: Şirin Fırın & Pastane (4 fark) ---------- */
+ { name:"Şirin Fırın & Pastane", layers:[
+   `<rect width="400" height="400" fill="#FFE7F0" stroke="none"/><path d="M0 30 H400" fill="none" stroke="#FF8FB8" stroke-width="16"/>`,
+   {diff:2},
+   `<rect x="140" y="102" width="130" height="10" rx="3" fill="#A0622D"/>
+    <ellipse cx="170" cy="92" rx="22" ry="12" fill="#E8A84A"/><path d="M160 88 L166 96 M172 86 L178 94" fill="none" stroke-width="3"/>
+    <ellipse cx="230" cy="90" rx="28" ry="14" fill="#C8763A"/><path d="M216 86 L222 94 M230 84 L236 92 M244 86 L248 92" fill="none" stroke-width="3"/>`,
+   `<circle cx="292" cy="122" r="12" fill="#2a2a30"/><circle cx="332" cy="122" r="12" fill="#2a2a30"/>
+    <ellipse cx="312" cy="226" rx="42" ry="44" fill="#fff"/>`,
+   {diff:1},
+   `<circle cx="312" cy="148" r="32" fill="#fff"/>
+    <ellipse cx="299" cy="146" rx="8" ry="11" transform="rotate(25 299 146)" fill="#2a2a30" stroke="none"/><ellipse cx="325" cy="146" rx="8" ry="11" transform="rotate(-25 325 146)" fill="#2a2a30" stroke="none"/>
+    <circle cx="300" cy="145" r="3" fill="#fff" stroke="none"/><circle cx="324" cy="145" r="3" fill="#fff" stroke="none"/>
+    <ellipse cx="312" cy="160" rx="5" ry="3.5" fill="#222"/><path d="M305 167 Q312 173 319 167" fill="none" stroke-width="3"/>` +
+    `<rect x="290" y="108" width="44" height="16" rx="3" fill="#fff"/>` + fluffy(312,98,24,12,7,"#fff"),
+   `<rect x="20" y="240" width="360" height="130" fill="#C98A4B"/><rect x="14" y="232" width="372" height="14" rx="4" fill="#A0622D"/>
+    <rect x="40" y="256" width="210" height="74" rx="6" fill="#DFF6FF"/>
+    <rect x="58" y="288" width="44" height="28" rx="3" fill="#FFD28A"/><path d="M58 290 Q80 278 102 290 V296 Q80 286 58 296Z" fill="#FF8FB8" stroke-width="3"/><circle cx="80" cy="278" r="6" fill="#FF4D4D" stroke-width="3"/>
+    <path d="M120 316 L124 296 H148 L152 316Z" fill="#C8763A" stroke-width="4"/>` + fluffy(136,290,14,8,6,"#FFF3DD"),
+   {diff:0},
+   {diff:3}
+ ], diffs:[
+   { x:200, y:300, r:28, // vitrindeki kruvasan
+     L:`<path d="M176 310 Q174 290 190 284 L196 300Z M190 284 Q200 278 210 284 L204 300 H196Z M210 284 Q226 290 224 310 L204 300Z" fill="#E8A84A" stroke-width="4"/>`,
+     R:"" },
+   { x:312, y:220, r:26, // fırıncının önlüğü
+     L:`<path d="M290 200 H334 V240 H290Z" fill="#FF8FB8"/><rect x="304" y="214" width="16" height="12" rx="2" fill="#fff" stroke-width="3"/>`,
+     R:`<path d="M290 200 H334 V240 H290Z" fill="#3D8BFF"/><rect x="304" y="214" width="16" height="12" rx="2" fill="#fff" stroke-width="3"/>` },
+   { x:70, y:96, r:34, // duvardaki saat
+     L:`<circle cx="70" cy="96" r="30" fill="#FFD93B"/><circle cx="70" cy="96" r="21" fill="#fff" stroke-width="4"/><path d="M70 96 V82 M70 96 L80 102" fill="none" stroke-width="4"/>`,
+     R:"" },
+   { x:100, y:214, r:32, // ekmek sepeti
+     L:`<ellipse cx="88" cy="204" rx="8" ry="24" transform="rotate(-20 88 204)" fill="#E8A84A" stroke-width="4"/><ellipse cx="110" cy="200" rx="8" ry="26" transform="rotate(15 110 200)" fill="#E8A84A" stroke-width="4"/>
+        <path d="M68 212 H132 L122 236 H78Z" fill="#C98A4B"/><path d="M74 222 H126 M90 212 L92 236 M110 212 L108 236" fill="none" stroke-width="3"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 30: Korsan Adası (5 fark) ---------- */
+ { name:"Korsan Adası", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(200,50,.7),
+   `<rect x="0" y="218" width="400" height="182" fill="#2F86F0"/><path d="M150 236 Q165 228 180 236 M350 240 Q365 232 380 240" fill="none" stroke="#fff" stroke-width="4"/>`,
+   `<path d="M80 236 V120" fill="none" stroke-width="5"/>`,
+   {diff:1},
+   `<path d="M80 128 L80 222 L128 222Z" fill="#fff"/><path d="M18 226 H128 L112 254 H34Z" fill="#A0622D"/>`,
+   `<path d="M50 400 Q76 266 220 254 Q364 266 384 400Z" fill="#F6D98B"/>`,
+   `<path d="M284 300 Q272 210 300 124" fill="none" stroke-width="20"/><path d="M284 300 Q272 210 300 124" fill="none" stroke="#A0622D" stroke-width="12"/>
+    <path d="M300 124 Q260 92 228 112 Q262 108 300 124Z M300 124 Q344 90 376 112 Q340 108 300 124Z M300 124 Q270 130 250 166 Q282 140 300 124Z M300 124 Q336 132 352 168 Q322 140 300 124Z M300 124 Q300 90 318 70 Q308 100 300 124Z" fill="#3FC35A" stroke-width="4"/>`,
+   {diff:2},
+   `<rect x="144" y="224" width="12" height="46" rx="5" fill="#2C3E8F"/><rect x="164" y="224" width="12" height="46" rx="5" fill="#2C3E8F"/>
+    <rect x="140" y="214" width="40" height="18" rx="3" fill="#A0622D"/>
+    <rect x="138" y="178" width="44" height="42" rx="10" fill="#fff"/><path d="M138 190 H182 M138 202 H182" fill="none" stroke="#FF4D4D" stroke-width="5"/>
+    <circle cx="160" cy="158" r="25" fill="#FFD2A6"/><path d="M146 150 L178 146" fill="none" stroke-width="3"/><ellipse cx="168" cy="152" rx="7" ry="6" fill="#2a2a30"/>
+    <circle cx="151" cy="155" r="3" fill="#222" stroke="none"/><path d="M150 168 Q160 175 170 168" fill="none" stroke-width="3"/>`,
+   {diff:0},
+   {diff:3},
+   {diff:4}
+ ], diffs:[
+   { x:160, y:138, r:28, // korsanın şapkası
+     L:`<path d="M128 146 Q160 102 192 146 Q160 134 128 146Z" fill="#2a2a30"/><circle cx="160" cy="128" r="5" fill="#fff" stroke-width="2"/>`,
+     R:`<path d="M136 148 Q160 120 184 148Z" fill="#FF4D4D"/><circle cx="186" cy="150" r="5" fill="#FF4D4D" stroke-width="3"/>` },
+   { x:96, y:136, r:24, // bayraktaki kurukafa
+     L:`<rect x="80" y="120" width="34" height="28" fill="#2a2a30" stroke-width="4"/><circle cx="97" cy="131" r="6" fill="#fff" stroke="none"/><path d="M89 142 L105 138 M89 138 L105 142" fill="none" stroke="#fff" stroke-width="3"/>`,
+     R:`<rect x="80" y="120" width="34" height="28" fill="#2a2a30" stroke-width="4"/>` },
+   { x:296, y:134, r:26, // hindistan cevizi
+     L:`<circle cx="286" cy="134" r="9" fill="#8B5A2B" stroke-width="4"/><circle cx="304" cy="136" r="9" fill="#8B5A2B" stroke-width="4"/><circle cx="296" cy="148" r="9" fill="#8B5A2B" stroke-width="4"/>`,
+     R:"" },
+   { x:100, y:346, r:26, // kıyıdaki şişe
+     L:`<path d="M84 354 L112 330 L122 336 L96 362Z" fill="#7FD8A0"/><rect x="116" y="322" width="10" height="10" rx="2" transform="rotate(-40 121 327)" fill="#A0622D" stroke-width="3"/><path d="M96 348 L106 340" fill="none" stroke="#fff" stroke-width="4"/>`,
+     R:"" },
+   { x:244, y:340, r:34, // define haritası
+     L:`<path d="M214 322 H274 V360 H214Z" fill="#FFF3DD"/><path d="M214 322 Q208 341 214 360 M274 322 Q280 341 274 360" fill="none" stroke-width="4"/>
+        <path d="M226 352 Q240 330 254 340" fill="none" stroke="#3D8BFF" stroke-width="3" stroke-dasharray="4 4"/><path d="M252 332 L264 344 M264 332 L252 344" fill="none" stroke="#FF4D4D" stroke-width="5"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 31: Uzay İstasyonu (5 fark) ---------- */
+ { name:"Uzay İstasyonu", layers:[
+   `<rect width="400" height="400" fill="#26357A" stroke="none"/>` +
+     [[30,180],[190,40],[260,90],[370,40],[150,370],[380,360],[30,370],[210,260]].map(([x,y])=>`<path d="${starPath(x,y,7)}" fill="#FFE66D" stroke-width="3"/>`).join(""),
+   {diff:4},
+   `<path d="M130 180 H150 M250 180 H270" fill="none" stroke-width="8"/>`,
+   `<rect x="20" y="160" width="110" height="40" fill="#3D8BFF"/><path d="M47 160 V200 M75 160 V200 M102 160 V200 M20 180 H130" fill="none" stroke-width="3"/>`,
+   {diff:2},
+   {diff:1},
+   `<rect x="150" y="150" width="100" height="60" rx="20" fill="#E6E9F2"/><circle cx="180" cy="180" r="10" fill="#7FD8FF" stroke-width="4"/><circle cx="220" cy="180" r="10" fill="#7FD8FF" stroke-width="4"/>`,
+   `<path d="M110 290 Q140 250 160 212" fill="none" stroke-width="4" stroke-dasharray="6 6"/>
+    <rect x="72" y="282" width="14" height="34" rx="6" fill="#fff" transform="rotate(20 79 299)"/><rect x="96" y="282" width="14" height="34" rx="6" fill="#fff" transform="rotate(-20 103 299)"/>
+    <rect x="70" y="248" width="44" height="46" rx="12" fill="#fff"/><rect x="82" y="260" width="20" height="14" rx="3" fill="#FF4D4D" stroke-width="3"/>
+    <rect x="52" y="252" width="20" height="12" rx="6" fill="#fff"/><rect x="112" y="252" width="20" height="12" rx="6" fill="#fff"/>
+    <circle cx="92" cy="232" r="26" fill="#fff"/>`,
+   {diff:0},
+   `<path d="M240 330 L270 300 H284 L270 330Z" fill="#C9CED9"/><path d="M230 302 H328 Q368 310 328 322 H230Z" fill="#fff"/><path d="M332 306 Q348 310 336 314Z" fill="#7FD8FF" stroke-width="3"/>
+    <path d="M236 300 L246 280 H258 L256 302Z" fill="#C9CED9"/>`,
+   {diff:3}
+ ], diffs:[
+   { x:92, y:234, r:24, // kask yansıması
+     L:`<ellipse cx="92" cy="234" rx="18" ry="14" fill="#FFD93B"/><path d="M82 230 Q86 224 94 224" fill="none" stroke="#fff" stroke-width="4"/>`,
+     R:`<ellipse cx="92" cy="234" rx="18" ry="14" fill="#2C3E8F"/>` },
+   { x:200, y:128, r:24, // uydu anteni
+     L:`<path d="M200 150 V132" fill="none" stroke-width="4"/><path d="M178 116 Q200 144 222 116Z" fill="#E6E9F2"/><circle cx="200" cy="112" r="4" fill="#FF4D4D" stroke-width="3"/>`,
+     R:"" },
+   { x:325, y:180, r:40, zones:[[298,180,26],[352,180,26]], // güneş paneli
+     L:`<rect x="270" y="160" width="110" height="40" fill="#3D8BFF"/><path d="M297 160 V200 M325 160 V200 M352 160 V200 M270 180 H380" fill="none" stroke-width="3"/>`,
+     R:"" },
+   { x:214, y:311, r:22, // mekiğin motoru
+     L:`<path d="M230 304 Q206 300 196 311 Q206 322 230 318Z" fill="#FF9A2E"/><path d="M230 307 Q216 306 210 311 Q216 316 230 315Z" fill="#FFD93B" stroke-width="3"/>`,
+     R:"" },
+   { x:84, y:72, r:32, // kuyruklu yıldız
+     L:`<path d="M90 66 L150 40 L142 56 L156 60 L96 80Z" fill="#7FD8FF" fill-opacity=".85" stroke-width="3"/><path d="${starPath(84,72,16)}" fill="#FFD93B" stroke-width="4"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 32: Bahar Çiçekleri & Arılar (4 fark) ---------- */
+ { name:"Bahar Çiçekleri & Arılar", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/><circle cx="60" cy="50" r="24" fill="#FFD93B"/>`,
+   `<path d="M0 230 Q200 214 400 234 V400 H0Z" fill="#8FD96A"/>`,
+   `<rect x="352" y="40" width="30" height="210" fill="#A0622D"/><path d="M356 110 Q330 104 290 110" fill="none" stroke-width="10"/><path d="M356 110 Q330 104 290 110" fill="none" stroke="#A0622D" stroke-width="5"/>` + fluffy(372,40,40,30,9,"#3FC35A"),
+   {diff:1},
+   [70,190].map(x=>tulip(x,250,x===70?"#FF8FB8":"#FFD93B")).join(""),
+   {diff:0},
+   `<g transform="translate(220 100)"><path d="M-6 -8 Q-14 -24 -2 -24 Q4 -16 0 -8Z M4 -8 Q12 -24 22 -18 Q16 -8 6 -6Z" fill="#DFF6FF" stroke-width="3"/><ellipse cx="0" cy="0" rx="16" ry="11" fill="#FFD93B"/><path d="M-4 -10 V10 M5 -10 V10" fill="none" stroke-width="4"/><circle cx="-11" cy="-2" r="2.2" fill="#222" stroke="none"/></g>
+    <g transform="translate(160 170)"><path d="M-6 -8 Q-14 -24 -2 -24 Q4 -16 0 -8Z M4 -8 Q12 -24 22 -18 Q16 -8 6 -6Z" fill="#DFF6FF" stroke-width="3"/><ellipse cx="0" cy="0" rx="16" ry="11" fill="#FFD93B"/><path d="M-4 -10 V10 M5 -10 V10" fill="none" stroke-width="4"/><circle cx="-11" cy="-2" r="2.2" fill="#222" stroke="none"/></g>`,
+   `<rect x="250" y="300" width="62" height="52" rx="8" fill="#3D8BFF"/><path d="M262 300 Q281 270 300 300" fill="none" stroke-width="5"/><path d="M312 318 L340 294" fill="none" stroke-width="12"/><path d="M312 318 L340 294" fill="none" stroke="#3D8BFF" stroke-width="6"/>`,
+   {diff:2},
+   flower(40,330,"#A45CFF",.8) + flower(200,356,"#FF4D4D",.8),
+   {diff:3}
+ ], diffs:[
+   { x:130, y:238, r:26, // lalenin rengi
+     L:tulip(130,250,"#FF4D4D"), R:tulip(130,250,"#A45CFF") },
+   { x:316, y:140, r:32, // arı kovanı
+     L:`<path d="M316 112 V120" fill="none" stroke-width="4"/><path d="M294 166 Q290 120 316 118 Q342 120 338 166Z" fill="#FFD93B"/>
+        <path d="M296 132 H336 M294 148 H338" fill="none" stroke-width="4"/><ellipse cx="316" cy="158" rx="6" ry="5" fill="#2a2a30"/>`,
+     R:"" },
+   { x:344, y:290, r:20, // sulama kabının ucu
+     L:`<ellipse cx="344" cy="290" rx="11" ry="7" transform="rotate(-40 344 290)" fill="#FFD93B" stroke-width="4"/>`, R:"" },
+   { x:130, y:352, r:22, // uğur böceği
+     L:`<circle cx="120" cy="352" r="7" fill="#2a2a30"/><path d="M122 352 A14 14 0 0 1 150 352 Z" fill="#FF4D4D"/><ellipse cx="136" cy="352" rx="14" ry="11" fill="#FF4D4D"/>
+        <path d="M136 341 V363" fill="none" stroke-width="3"/><circle cx="130" cy="348" r="2.6" fill="#222" stroke="none"/><circle cx="142" cy="356" r="2.6" fill="#222" stroke="none"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 33: Tren İstasyonu (5 fark) ---------- */
+ { name:"Tren İstasyonu", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>`,
+   `<rect x="0" y="30" width="400" height="24" fill="#FF6B6B"/><rect x="186" y="54" width="10" height="10" fill="#777" stroke-width="3"/><rect x="204" y="54" width="10" height="10" fill="#777" stroke-width="3"/>
+    <rect x="368" y="54" width="14" height="230" fill="#C9CED9"/>`,
+   `<circle cx="200" cy="92" r="28" fill="#fff"/><circle cx="200" cy="92" r="28" fill="none" stroke="#2C3E8F" stroke-width="7"/><path d="M200 92 V72" fill="none" stroke-width="4"/>`,
+   {diff:0},
+   `<rect x="0" y="300" width="400" height="100" fill="#A3ABBA"/><path d="M0 330 H400 M0 360 H400" fill="none" stroke-width="6"/>` +
+     [20,70,120,170,220,270,320,370].map(x=>`<rect x="${x}" y="322" width="12" height="46" fill="#8B5A2B" stroke-width="3"/>`).join(""),
+   `<rect x="180" y="276" width="220" height="30" fill="#D9D9E3"/>`,
+   `<rect x="20" y="170" width="152" height="124" rx="10" fill="#3FC35A"/><rect x="34" y="186" width="44" height="36" rx="4" fill="#BFE9FF"/><rect x="92" y="186" width="44" height="36" rx="4" fill="#BFE9FF"/>
+    <rect x="150" y="186" width="18" height="40" rx="3" fill="#BFE9FF" stroke-width="4"/><rect x="20" y="236" width="152" height="10" fill="#FFD93B" stroke="none"/>
+    <circle cx="54" cy="300" r="18" fill="#2a2a30"/><circle cx="134" cy="300" r="18" fill="#2a2a30"/>`,
+   {diff:1},
+   {diff:3},
+   `<rect x="240" y="256" width="9" height="24" rx="4" fill="#2C3E8F"/><rect x="252" y="256" width="9" height="24" rx="4" fill="#2C3E8F"/>
+    <rect x="236" y="214" width="28" height="44" rx="8" fill="#A45CFF"/>
+    <circle cx="250" cy="200" r="17" fill="#FFD2A6"/><circle cx="244" cy="200" r="2.4" fill="#222" stroke="none"/><circle cx="256" cy="200" r="2.4" fill="#222" stroke="none"/><path d="M245 207 Q250 211 255 207" fill="none" stroke-width="3"/>`,
+   {diff:4},
+   {diff:2}
+ ], diffs:[
+   { x:200, y:92, r:30, // saatin akrebi
+     L:`<path d="M200 92 L214 92" fill="none" stroke="#FF4D4D" stroke-width="6"/><circle cx="200" cy="92" r="4" fill="#222" stroke="none"/>`,
+     R:`<path d="M200 92 L186 92" fill="none" stroke="#FF4D4D" stroke-width="6"/><circle cx="200" cy="92" r="4" fill="#222" stroke="none"/>` },
+   { x:164, y:262, r:20, // ön far
+     L:`<circle cx="164" cy="262" r="10" fill="#FFD93B" stroke-width="4"/>`,
+     R:`<circle cx="164" cy="262" r="10" fill="#6b6b6b" stroke-width="4"/>` },
+   { x:284, y:262, r:22, // yolcunun bavulu
+     L:`<path d="M278 248 V242 H290 V248" fill="none" stroke-width="3"/><rect x="272" y="248" width="24" height="30" rx="4" fill="#FF9A2E"/><path d="M272 262 H296" fill="none" stroke-width="3"/>`,
+     R:"" },
+   { x:340, y:256, r:32, // peron bankı
+     L:`<rect x="306" y="240" width="64" height="10" rx="3" fill="#A0622D"/><rect x="306" y="226" width="64" height="10" rx="3" fill="#A0622D"/><path d="M312 250 V276 M364 250 V276" fill="none" stroke-width="5"/>`,
+     R:"" },
+   { x:250, y:184, r:22, // şapkanın rengi
+     L:`<path d="M233 192 Q234 172 250 172 Q266 172 267 192Z" fill="#3D8BFF"/><path d="M262 190 H276" fill="none" stroke-width="5"/>`,
+     R:`<path d="M233 192 Q234 172 250 172 Q266 172 267 192Z" fill="#FF4D4D"/><path d="M262 190 H276" fill="none" stroke-width="5"/>` }
+ ]},
+ /* ---------- Seviye 34: Robot Laboratuvarı (5 fark) ---------- */
+ { name:"Robot Laboratuvarı", layers:[
+   `<rect width="400" height="400" fill="#DDE6F2" stroke="none"/><rect x="0" y="310" width="400" height="90" fill="#A3ABBA"/><path d="M0 350 H400" fill="none" stroke-width="3"/>`,
+   {diff:3},
+   {diff:4},
+   `<rect x="20" y="262" width="70" height="50" rx="4" fill="#C98A4B"/><path d="M20 262 L90 312 M90 262 L20 312" fill="none" stroke-width="3"/>`,
+   `<rect x="166" y="262" width="22" height="42" rx="6" fill="#A3D8F5"/><rect x="212" y="262" width="22" height="42" rx="6" fill="#A3D8F5"/>
+    <rect x="158" y="300" width="36" height="14" rx="5" fill="#555"/><rect x="206" y="300" width="36" height="14" rx="5" fill="#555"/>
+    <rect x="120" y="184" width="26" height="62" rx="10" fill="#A3D8F5"/><rect x="254" y="184" width="26" height="62" rx="10" fill="#A3D8F5"/>
+    <circle cx="133" cy="252" r="12" fill="#777"/>`,
+   {diff:1},
+   `<rect x="150" y="174" width="100" height="92" rx="14" fill="#7FD8FF"/>
+    <rect x="186" y="162" width="28" height="14" fill="#777"/>
+    <rect x="160" y="108" width="80" height="58" rx="14" fill="#A3D8F5"/>
+    <circle cx="184" cy="134" r="10" fill="#fff" stroke-width="4"/><circle cx="216" cy="134" r="10" fill="#fff" stroke-width="4"/>
+    <circle cx="184" cy="134" r="4" fill="#222" stroke="none"/><circle cx="216" cy="134" r="4" fill="#222" stroke="none"/>
+    <rect x="186" y="150" width="28" height="8" rx="3" fill="#fff" stroke-width="3"/>
+    <circle cx="180" cy="248" r="5" fill="#FF4D4D" stroke-width="3"/><circle cx="200" cy="248" r="5" fill="#FFD93B" stroke-width="3"/><circle cx="220" cy="248" r="5" fill="#3FC35A" stroke-width="3"/>`,
+   {diff:0},
+   {diff:2},
+   `<circle cx="267" cy="252" r="12" fill="#777"/>`
+ ], diffs:[
+   { x:200, y:210, r:26, // göğüs ekranı
+     L:`<rect x="172" y="192" width="56" height="38" rx="5" fill="#3FC35A"/><path d="M178 212 H188 L194 200 L202 222 L208 212 H222" fill="none" stroke="#fff" stroke-width="3"/>`,
+     R:`<rect x="172" y="192" width="56" height="38" rx="5" fill="#FF4D4D"/><path d="M178 212 H188 L194 200 L202 222 L208 212 H222" fill="none" stroke="#fff" stroke-width="3"/>` },
+   { x:200, y:94, r:22, // anten
+     L:`<path d="M200 108 V90" fill="none" stroke-width="5"/><circle cx="200" cy="86" r="8" fill="#FF4D4D" stroke-width="4"/>`, R:"" },
+   { x:298, y:232, r:24, // somun anahtarı
+     L:`<path d="M272 248 L314 220" fill="none" stroke-width="12"/><path d="M272 248 L314 220" fill="none" stroke="#C9CED9" stroke-width="6"/>
+        <path d="M310 206 a12 12 0 1 0 14 18 l-8 -4 l-2 -8Z" fill="#C9CED9" stroke-width="4"/>`,
+     R:"" },
+   { x:70, y:80, r:34, // dişli çark
+     L:`<path d="${gearPath(70,80,30,22,10)}" fill="#FF9A2E" stroke-width="4"/><circle cx="70" cy="80" r="9" fill="#DDE6F2" stroke-width="4"/>`, R:"" },
+   { x:332, y:78, r:30, // batarya göstergesi
+     L:`<rect x="300" y="60" width="60" height="34" rx="5" fill="#fff"/><rect x="360" y="70" width="7" height="14" rx="2" fill="#777" stroke-width="3"/>
+        <rect x="307" y="67" width="13" height="20" fill="#3FC35A" stroke-width="2"/><rect x="324" y="67" width="13" height="20" fill="#3FC35A" stroke-width="2"/><rect x="341" y="67" width="13" height="20" fill="#3FC35A" stroke-width="2"/>`,
+     R:`<rect x="300" y="60" width="60" height="34" rx="5" fill="#fff"/><rect x="360" y="70" width="7" height="14" rx="2" fill="#777" stroke-width="3"/>
+        <rect x="307" y="67" width="13" height="20" fill="#FF4D4D" stroke-width="2"/>` }
+ ]},
+ /* ---------- Seviye 35: Sihirbaz Sahnesi (4 fark) ---------- */
+ { name:"Sihirbaz Sahnesi", layers:[
+   `<rect width="400" height="400" fill="#3B2A6B" stroke="none"/><ellipse cx="200" cy="300" rx="190" ry="60" fill="#5A4590" stroke="none"/>`,
+   `<rect x="0" y="300" width="400" height="100" fill="#A0622D"/><path d="M0 300 H400" fill="none" stroke-width="5"/>`,
+   `<path d="M0 0 H60 Q70 150 40 300 H0Z" fill="#FF4D4D"/><path d="M400 0 H340 Q330 150 360 300 H400Z" fill="#FF4D4D"/>
+    <path d="M0 0 H400 V30 Q350 50 300 30 Q250 50 200 30 Q150 50 100 30 Q50 50 0 30Z" fill="#C0504D"/>`,
+   `<path d="M110 180 L76 318 H224 L190 180Z" fill="#2C3E8F"/>`,
+   {diff:2},
+   `<rect x="130" y="270" width="16" height="40" rx="5" fill="#2a2a30"/><rect x="154" y="270" width="16" height="40" rx="5" fill="#2a2a30"/>
+    <rect x="124" y="180" width="52" height="96" rx="10" fill="#2a2a30"/><path d="M140 180 L150 210 L160 180Z" fill="#fff" stroke-width="3"/>
+    <path d="M176 196 L204 186" fill="none" stroke-width="16"/><path d="M176 196 L204 186" fill="none" stroke="#2a2a30" stroke-width="9"/><circle cx="208" cy="185" r="8" fill="#fff" stroke-width="4"/>
+    <path d="M210 184 L236 166" fill="none" stroke-width="7"/>
+    <circle cx="128" cy="122" r="12" fill="#2a2a30"/><circle cx="172" cy="122" r="12" fill="#2a2a30"/>
+    <circle cx="150" cy="150" r="30" fill="#fff"/>
+    <ellipse cx="138" cy="148" rx="8" ry="11" transform="rotate(25 138 148)" fill="#2a2a30" stroke="none"/><ellipse cx="162" cy="148" rx="8" ry="11" transform="rotate(-25 162 148)" fill="#2a2a30" stroke="none"/>
+    <circle cx="139" cy="147" r="3" fill="#fff" stroke="none"/><circle cx="161" cy="147" r="3" fill="#fff" stroke="none"/>
+    <ellipse cx="150" cy="161" rx="5" ry="3.5" fill="#222"/><path d="M143 168 Q150 174 157 168" fill="none" stroke-width="3"/>
+    <rect x="128" y="86" width="44" height="34" rx="3" fill="#2a2a30"/><rect x="116" y="116" width="68" height="9" rx="3" fill="#2a2a30"/><rect x="128" y="108" width="44" height="7" fill="#FF4D4D" stroke="none"/>`,
+   {diff:1},
+   `<rect x="252" y="270" width="8" height="40" fill="#A0622D"/><rect x="340" y="270" width="8" height="40" fill="#A0622D"/>
+    <path d="M240 260 H360 V292 Q330 280 300 292 Q270 280 240 292Z" fill="#A45CFF"/><rect x="236" y="254" width="128" height="10" rx="3" fill="#C78BFF"/>`,
+   `<ellipse cx="292" cy="190" rx="6" ry="18" fill="#fff"/><ellipse cx="292" cy="192" rx="2.5" ry="10" fill="#FFAFC0" stroke="none"/>`,
+   {diff:0},
+   `<circle cx="300" cy="222" r="17" fill="#fff"/><circle cx="294" cy="220" r="2.4" fill="#222" stroke="none"/><circle cx="306" cy="220" r="2.4" fill="#222" stroke="none"/><ellipse cx="300" cy="227" rx="3" ry="2" fill="#FF8FB8" stroke="none"/>
+    <rect x="276" y="226" width="48" height="30" fill="#2a2a30"/><ellipse cx="300" cy="226" rx="30" ry="7" fill="#2a2a30"/>`,
+   {diff:3}
+ ], diffs:[
+   { x:309, y:188, r:22, // tavşanın kulağı
+     L:`<ellipse cx="309" cy="190" rx="6" ry="18" fill="#fff"/><ellipse cx="309" cy="192" rx="2.5" ry="10" fill="#FFAFC0" stroke="none"/>`, R:"" },
+   { x:238, y:164, r:22, // değneğin ucu
+     L:`<path d="${starPath(238,164,13)}" fill="#FFD93B" stroke-width="4"/><circle cx="256" cy="150" r="3" fill="#FFD93B" stroke="none"/><circle cx="252" cy="178" r="2.5" fill="#FFD93B" stroke="none"/>`,
+     R:"" },
+   { x:150, y:250, r:44, zones:[[106,280,26],[194,280,26],[150,300,26]], // pelerinin astarı
+     L:`<path d="M116 192 L92 310 H208 L184 192Z" fill="#FF4D4D"/>`,
+     R:`<path d="M116 192 L92 310 H208 L184 192Z" fill="#FFD93B"/>` },
+   { x:344, y:246, r:20, // iskambil kartı
+     L:`<rect x="332" y="232" width="24" height="30" rx="3" fill="#fff" transform="rotate(10 344 247)"/><path d="M344 244 q-6 -6 -6 0 q0 4 6 9 q6 -5 6 -9 q0 -6 -6 0Z" fill="#FF4D4D" stroke="none"/>`,
+     R:"" }
+ ]},
+ /* ---------- Seviye 36: Meyve Bahçesi (4 fark) ---------- */
+ { name:"Meyve Bahçesi", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(300,50,.8),
+   `<path d="M0 250 Q200 232 400 252 V400 H0Z" fill="#8FD96A"/>`,
+   `<rect x="110" y="150" width="36" height="124" fill="#A0622D"/>` + fluffy(128,116,92,58,12,"#3FC35A") +
+   `<circle cx="84" cy="108" r="11" fill="#FF4D4D" stroke-width="4"/><circle cx="160" cy="88" r="11" fill="#FF4D4D" stroke-width="4"/><circle cx="124" cy="150" r="11" fill="#FF4D4D" stroke-width="4"/><circle cx="60" cy="146" r="11" fill="#FF4D4D" stroke-width="4"/>`,
+   {diff:1},
+   {diff:0},
+   `<path d="M240 290 H320 L310 336 H250Z" fill="#C98A4B"/><path d="M246 306 H314 M248 320 H312" fill="none" stroke-width="3"/>
+    <circle cx="262" cy="284" r="11" fill="#FF4D4D" stroke-width="4"/><circle cx="284" cy="280" r="11" fill="#FF4D4D" stroke-width="4"/><circle cx="304" cy="285" r="11" fill="#FFD93B" stroke-width="4"/>`,
+   {diff:2},
+   {diff:3},
+   flower(200,330,"#FF8FB8",.8)
+ ], diffs:[
+   { x:280, y:260, r:28, // sepetin kulpu
+     L:`<path d="M246 292 Q280 228 314 292" fill="none" stroke-width="11"/><path d="M246 292 Q280 228 314 292" fill="none" stroke="#C98A4B" stroke-width="5"/>`, R:"" },
+   { x:190, y:144, r:24, // daldaki armut
+     L:`<path d="M190 124 V116" fill="none" stroke-width="4"/><path d="M190 124 Q182 130 184 140 Q172 152 182 162 Q190 168 198 162 Q208 152 196 140 Q198 130 190 124Z" fill="#C8E65A" stroke-width="4"/>`, R:"" },
+   { x:60, y:330, r:24, // kiraz
+     L:`<path d="M52 336 Q56 314 66 306 Q68 318 72 334" fill="none" stroke="#2E8B3E" stroke-width="4"/><circle cx="52" cy="340" r="9" fill="#C0283D" stroke-width="4"/><circle cx="72" cy="338" r="9" fill="#C0283D" stroke-width="4"/>`, R:"" },
+   { x:360, y:288, r:30, // ağaç kütüğü
+     L:`<path d="M334 270 V304 Q360 316 386 304 V270Z" fill="#A0622D"/><ellipse cx="360" cy="270" rx="26" ry="9" fill="#E8C27A"/><ellipse cx="360" cy="270" rx="12" ry="4" fill="none" stroke-width="3"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 37: İnşaat Sahası (5 fark) ---------- */
+ { name:"İnşaat Sahası", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>`,
+   `<path d="M0 260 Q200 246 400 262 V400 H0Z" fill="#E8C27A"/>`,
+   `<rect x="320" y="60" width="24" height="204" fill="#FFD93B"/><path d="M320 60 L344 110 L320 160 L344 210 L320 260" fill="none" stroke-width="3"/>
+    <rect x="150" y="48" width="236" height="16" fill="#FFD93B"/><rect x="330" y="30" width="20" height="20" fill="#FF9A2E"/>
+    <path d="M190 64 V150" fill="none" stroke-width="3"/>`,
+   {diff:3},
+   `<rect x="252" y="276" width="9" height="30" rx="4" fill="#2C3E8F"/><rect x="264" y="276" width="9" height="30" rx="4" fill="#2C3E8F"/>
+    <rect x="246" y="238" width="34" height="42" rx="8" fill="#FF9A2E"/><path d="M252 248 H274" fill="none" stroke="#FFF" stroke-width="4"/>
+    <circle cx="262" cy="226" r="16" fill="#FFD2A6"/><circle cx="256" cy="226" r="2.4" fill="#222" stroke="none"/><circle cx="268" cy="226" r="2.4" fill="#222" stroke="none"/>`,
+   {diff:1},
+   `<rect x="30" y="322" width="134" height="30" rx="15" fill="#2a2a30"/><circle cx="50" cy="337" r="7" fill="#777" stroke-width="3"/><circle cx="97" cy="337" r="7" fill="#777" stroke-width="3"/><circle cx="144" cy="337" r="7" fill="#777" stroke-width="3"/>`,
+   {diff:0},
+   {diff:2},
+   {diff:4}
+ ], diffs:[
+   { x:110, y:285, r:50, zones:[[95,290,36],[178,262,30]], // kepçenin rengi
+     L:digger("#FF9A2E"), R:digger("#3D8BFF") },
+   { x:262, y:214, r:22, // baret
+     L:`<path d="M244 224 Q246 204 262 204 Q278 204 280 224Z" fill="#FFD93B"/><path d="M240 224 H284" fill="none" stroke-width="5"/>`, R:"" },
+   { x:220, y:336, r:24, // kuki
+     L:`<path d="M206 352 L216 314 H224 L234 352Z" fill="#FF9A2E"/><path d="M212 334 H228" fill="none" stroke="#fff" stroke-width="5"/><rect x="200" y="350" width="40" height="8" rx="2" fill="#FF9A2E"/>`, R:"" },
+   { x:194, y:164, r:22, // vinç kancası
+     L:`<path d="M190 150 V164 Q190 178 202 176 Q206 172 204 166" fill="none" stroke-width="7"/><rect x="183" y="146" width="14" height="10" rx="2" fill="#777" stroke-width="3"/>`, R:"" },
+   { x:334, y:338, r:34, // çakıl yığını
+     L:`<path d="M296 362 Q320 308 334 310 Q350 308 374 362Z" fill="#A3ABBA"/>` + [[320,340],[336,326],[350,346],[332,352],[310,354]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.5" fill="#6b6b6b" stroke="none"/>`).join(""), R:"" }
+ ]},
+ /* ---------- Seviye 38: Kütüphane & Okuma Köşesi (4 fark) ---------- */
+ { name:"Kütüphane & Okuma Köşesi", layers:[
+   `<rect width="400" height="400" fill="#FFF1D6" stroke="none"/><rect x="0" y="300" width="400" height="100" fill="#C98A4B"/><path d="M0 345 H400" fill="none" stroke-width="3"/>`,
+   `<rect x="20" y="80" width="160" height="222" fill="#A0622D"/><rect x="28" y="88" width="144" height="62" fill="#6B3A1E" stroke-width="3"/><rect x="28" y="158" width="144" height="62" fill="#6B3A1E" stroke-width="3"/><rect x="28" y="228" width="144" height="66" fill="#6B3A1E" stroke-width="3"/>` +
+     [[32,20,"#FF4D4D"],[54,18,"#3D8BFF"],[74,22,"#FFD93B"],[98,12,"#A45CFF"],[136,16,"#FF9A2E"],[154,14,"#7FD8FF"]].map(([x,w,c])=>`<rect x="${x}" y="94" width="${w}" height="56" fill="${c}" stroke-width="3"/>`).join("") +
+     [[32,16,"#3FC35A"],[50,22,"#FF8FB8"],[74,18,"#FFD93B"],[94,14,"#3D8BFF"],[110,20,"#FF4D4D"],[132,18,"#A45CFF"]].map(([x,w,c])=>`<rect x="${x}" y="164" width="${w}" height="56" fill="${c}" stroke-width="3"/>`).join("") +
+     [[32,20,"#FF9A2E"],[54,16,"#7FD8FF"],[72,22,"#FF4D4D"],[96,18,"#FFD93B"]].map(([x,w,c])=>`<rect x="${x}" y="236" width="${w}" height="58" fill="${c}" stroke-width="3"/>`).join(""),
+   {diff:0},
+   `<rect x="250" y="60" width="110" height="100" rx="6" fill="#BFE9FF"/><path d="M305 60 V160 M250 110 H360" fill="none" stroke-width="5"/><rect x="242" y="52" width="126" height="10" rx="3" fill="#A0622D"/>`,
+   {diff:2},
+   `<path d="M220 140 V296" fill="none" stroke-width="8"/><path d="M220 140 V296" fill="none" stroke="#777" stroke-width="3"/><ellipse cx="220" cy="300" rx="22" ry="7" fill="#555"/><circle cx="220" cy="146" r="7" fill="#FFE66D" stroke-width="3"/>`,
+   {diff:1},
+   {diff:3}
+ ], diffs:[
+   { x:123, y:122, r:22, // yeşil kitap
+     L:`<rect x="112" y="94" width="22" height="56" fill="#3FC35A" stroke-width="3"/><path d="M116 110 H130" fill="none" stroke="#fff" stroke-width="3"/>`, R:"" },
+   { x:220, y:126, r:24, // lambanın şapkası
+     L:`<path d="M198 142 L208 110 H232 L242 142Z" fill="#FFD93B"/>`, R:"" },
+   { x:305, y:110, r:60, zones:[[258,112,24],[352,112,24]], // perde
+     L:`<path d="M250 62 H276 Q266 110 280 162 H250Z M360 62 H334 Q344 110 330 162 H360Z" fill="#FF8FB8"/>`, R:"" },
+   { x:310, y:332, r:32, // minder
+     L:fluffy(310,334,34,16,9,"#A45CFF") + `<circle cx="310" cy="332" r="4" fill="#FFD93B" stroke-width="3"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 39: Panda Kamp Ateşi & Gece (5 fark) ---------- */
+ { name:"Panda Kamp Ateşi & Gece", layers:[
+   `<rect width="400" height="400" fill="#2C3E8F" stroke="none"/>` +
+     [[30,40],[150,30],[220,90],[60,130],[260,160],[180,150]].map(([x,y])=>`<path d="${starPath(x,y,6)}" fill="#FFE66D" stroke-width="3"/>`).join(""),
+   {diff:1},
+   `<path d="M0 280 Q200 262 400 282 V400 H0Z" fill="#2E8B3E"/>`,
+   `<path d="M20 300 L100 168 L180 300Z" fill="#FF9A2E"/><path d="M100 220 L72 300 H128Z" fill="#C95F00"/><path d="M100 168 V156" fill="none" stroke-width="5"/>`,
+   {diff:2},
+   `<path d="M250 330 Q226 306 240 282 Q244 298 252 296 Q250 276 264 262 Q266 286 276 292 Q280 316 250 330Z" fill="#FF9A2E"/><path d="M252 326 Q240 314 248 300 Q254 310 260 306 Q268 318 252 326Z" fill="#FFD93B" stroke-width="3"/>
+    <rect x="214" y="326" width="74" height="14" rx="6" transform="rotate(12 251 333)" fill="#8B5A2B"/><rect x="214" y="326" width="74" height="14" rx="6" transform="rotate(-12 251 333)" fill="#8B5A2B"/>`,
+   {diff:3},
+   `<circle cx="314" cy="244" r="11" fill="#2a2a30"/><circle cx="356" cy="244" r="11" fill="#2a2a30"/>
+    <ellipse cx="335" cy="322" rx="38" ry="34" fill="#fff"/><ellipse cx="312" cy="348" rx="16" ry="11" fill="#2a2a30"/><ellipse cx="358" cy="348" rx="16" ry="11" fill="#2a2a30"/>
+    <circle cx="335" cy="268" r="28" fill="#fff"/>
+    <ellipse cx="324" cy="266" rx="7" ry="10" transform="rotate(25 324 266)" fill="#2a2a30" stroke="none"/><ellipse cx="346" cy="266" rx="7" ry="10" transform="rotate(-25 346 266)" fill="#2a2a30" stroke="none"/>
+    <circle cx="325" cy="265" r="2.6" fill="#fff" stroke="none"/><circle cx="345" cy="265" r="2.6" fill="#fff" stroke="none"/>
+    <ellipse cx="335" cy="278" rx="4.5" ry="3" fill="#222"/><path d="M329 284 Q335 289 341 284" fill="none" stroke-width="3"/>`,
+   {diff:0},
+   `<ellipse cx="306" cy="300" rx="10" ry="16" transform="rotate(50 306 300)" fill="#2a2a30"/>`,
+   {diff:4}
+ ], diffs:[
+   { x:284, y:290, r:24, // pandanın çubuğu
+     L:`<path d="M302 298 L266 284" fill="none" stroke-width="8"/><path d="M302 298 L266 284" fill="none" stroke="#C8763A" stroke-width="3"/><rect x="254" y="274" width="14" height="14" rx="4" fill="#fff" stroke-width="3"/>`, R:"" },
+   { x:322, y:72, r:34, // hilal
+     L:`<path d="M340 38 A34 34 0 1 0 340 106 A40 40 0 0 1 340 38Z" fill="#FFE66D"/>`, R:"" },
+   { x:100, y:204, r:22, // çadırdaki fener
+     L:`<path d="M100 186 V192" fill="none" stroke-width="3"/><rect x="91" y="192" width="18" height="22" rx="4" fill="#FFD93B"/><rect x="88" y="190" width="24" height="5" rx="2" fill="#555" stroke-width="2"/>`, R:"" },
+   { x:254, y:250, r:28, // kıvılcımlar
+     L:`<path d="${starPath(238,262,7)}" fill="#FFD93B" stroke-width="3"/><path d="${starPath(264,246,8)}" fill="#FFD93B" stroke-width="3"/><path d="${starPath(250,230,6)}" fill="#FF9A2E" stroke-width="3"/>`, R:"" },
+   { x:150, y:352, r:30, // kütük
+     L:`<rect x="118" y="338" width="64" height="28" rx="6" fill="#A0622D"/><ellipse cx="182" cy="352" rx="8" ry="14" fill="#E8C27A"/><path d="M130 348 H160 M136 358 H168" fill="none" stroke-width="3"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 40: Deniz Kıyısı Balık Tutma (4 fark) ---------- */
+ { name:"Deniz Kıyısı Balık Tutma", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/><circle cx="210" cy="50" r="24" fill="#FFD93B"/>` + cloud(100,60,.7),
+   `<rect x="0" y="250" width="400" height="150" fill="#5CC8F0"/><path d="M250 330 Q265 322 280 330 M330 370 Q345 362 360 370 M260 380 Q275 372 290 380" fill="none" stroke="#fff" stroke-width="4"/>`,
+   `<rect x="34" y="240" width="14" height="110" fill="#8B5A2B"/><rect x="104" y="240" width="14" height="110" fill="#8B5A2B"/>`,
+   {diff:2},
+   `<rect x="0" y="228" width="232" height="18" fill="#C98A4B"/><path d="M50 228 V246 M110 228 V246 M170 228 V246" fill="none" stroke-width="3"/>`,
+   `<rect x="118" y="196" width="34" height="34" rx="10" fill="#3FC35A"/><rect x="128" y="226" width="40" height="10" rx="4" fill="#2C3E8F"/>
+    <circle cx="135" cy="180" r="18" fill="#FFD2A6"/><path d="M118 176 Q120 158 135 158 Q150 158 152 176Z" fill="#FFD93B"/><circle cx="141" cy="182" r="2.4" fill="#222" stroke="none"/>
+    <path d="M150 206 L290 100" fill="none" stroke-width="6"/><path d="M290 100 Q300 190 300 282" fill="none" stroke-width="2"/>`,
+   {diff:0},
+   {diff:1},
+   {diff:3}
+ ], diffs:[
+   { x:300, y:284, r:20, // oltanın mantarı
+     L:`<circle cx="300" cy="284" r="9" fill="#fff" stroke-width="4"/><path d="M291 284 A9 9 0 0 1 309 284Z" fill="#FF4D4D" stroke-width="3"/>`, R:"" },
+   { x:62, y:212, r:22, // kova
+     L:`<path d="M46 198 Q62 182 78 198" fill="none" stroke-width="3"/><path d="M44 200 H80 L76 228 H48Z" fill="#3D8BFF"/>`,
+     R:`<path d="M46 198 Q62 182 78 198" fill="none" stroke-width="3"/><path d="M44 200 H80 L76 228 H48Z" fill="#FF4D4D"/>` },
+   { x:181, y:292, r:26, // iskele ayağı
+     L:`<rect x="174" y="240" width="14" height="110" fill="#8B5A2B"/>`, R:"" },
+   { x:342, y:62, r:30, // pelikan
+     L:`<path d="M330 60 Q316 40 300 44 Q312 58 330 66Z M350 60 Q362 40 380 42 Q368 58 350 66Z" fill="#fff" stroke-width="4"/>
+        <ellipse cx="340" cy="64" rx="16" ry="9" fill="#fff" stroke-width="4"/><circle cx="326" cy="58" r="7" fill="#fff" stroke-width="4"/>
+        <path d="M320 58 L300 66 L318 66Z" fill="#FFD93B" stroke-width="3"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 41: Rengarenk Uçurtma Tepesi (5 fark) ---------- */
+ { name:"Rengarenk Uçurtma Tepesi", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(320,60,.7),
+   `<path d="M0 300 Q200 200 400 300 V400 H0Z" fill="#8FD96A"/>`,
+   `<path d="M200 150 L176 236" fill="none" stroke-width="2"/>`,
+   {diff:0},
+   `<path d="M200 40 L240 90 L200 90Z" fill="#FF4D4D"/><path d="M200 40 L160 90 L200 90Z" fill="#FFD93B"/><path d="M160 90 L200 150 L200 90Z" fill="#3D8BFF"/><path d="M240 90 L200 150 L200 90Z" fill="#3FC35A"/>`,
+   `<rect x="166" y="248" width="9" height="26" rx="4" fill="#2C3E8F"/><rect x="178" y="248" width="9" height="26" rx="4" fill="#2C3E8F"/>
+    <rect x="162" y="212" width="30" height="40" rx="8" fill="#FF8FB8"/><circle cx="176" cy="198" r="16" fill="#FFD2A6"/>
+    <path d="M160 194 Q162 178 176 178 Q190 178 192 194Z" fill="#6B3A1E"/><circle cx="171" cy="200" r="2.4" fill="#222" stroke="none"/><circle cx="182" cy="200" r="2.4" fill="#222" stroke="none"/>`,
+   `<path d="M320 268 V176" fill="none" stroke-width="5"/>`,
+   {diff:1},
+   {diff:2},
+   {diff:3},
+   {diff:4}
+ ], diffs:[
+   { x:222, y:200, r:40, zones:[[218,176,22],[228,228,22]], // uçurtma kuyruğu
+     L:`<path d="M200 150 Q232 168 218 198 Q206 230 240 252" fill="none" stroke-width="4"/>
+        <path d="M218 168 L232 162 L226 176Z M214 200 L228 194 L224 208Z M226 232 L240 228 L236 242Z" fill="#FF4D4D" stroke-width="3"/>`, R:"" },
+   { x:320, y:178, r:28, // rüzgâr gülü
+     L:`<path d="M320 178 L320 150 Q340 156 320 178Z" fill="#FF4D4D" stroke-width="3"/><path d="M320 178 L348 178 Q342 198 320 178Z" fill="#3D8BFF" stroke-width="3"/>
+        <path d="M320 178 L320 206 Q300 200 320 178Z" fill="#FFD93B" stroke-width="3"/><path d="M320 178 L292 178 Q298 158 320 178Z" fill="#3FC35A" stroke-width="3"/><circle cx="320" cy="178" r="4" fill="#fff" stroke-width="3"/>`, R:"" },
+   { x:60, y:300, r:32, // çiçekli çalı
+     L:fluffy(60,302,36,22,9,"#2E8B3E") + `<circle cx="44" cy="296" r="6" fill="#FF8FB8" stroke-width="3"/><circle cx="66" cy="288" r="6" fill="#FF8FB8" stroke-width="3"/><circle cx="78" cy="306" r="6" fill="#FF8FB8" stroke-width="3"/><circle cx="54" cy="312" r="6" fill="#FF8FB8" stroke-width="3"/>`,
+     R:fluffy(60,302,36,22,9,"#2E8B3E") },
+   { x:262, y:282, r:28, // piknik sepeti
+     L:`<path d="M244 278 Q262 252 280 278" fill="none" stroke-width="5"/><path d="M240 276 H284 L278 304 H246Z" fill="#C98A4B"/><path d="M242 284 H282" fill="none" stroke="#FF4D4D" stroke-width="5"/>`, R:"" },
+   { x:90, y:150, r:26, // uçan böcek
+     L:`<ellipse cx="80" cy="144" rx="11" ry="8" transform="rotate(-25 80 144)" fill="#FF9A2E" stroke-width="4"/><ellipse cx="100" cy="144" rx="11" ry="8" transform="rotate(25 100 144)" fill="#FF9A2E" stroke-width="4"/>
+        <ellipse cx="90" cy="150" rx="3.5" ry="11" fill="#222"/><path d="M88 140 Q84 132 80 131 M92 140 Q96 132 100 131" fill="none" stroke-width="3"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 42: Oyuncak Fabrikası (5 fark) ---------- */
+ { name:"Oyuncak Fabrikası", layers:[
+   `<rect width="400" height="400" fill="#E8F0FA" stroke="none"/><rect x="0" y="300" width="400" height="100" fill="#A3ABBA"/><path d="M0 0 H400" fill="none" stroke-width="10"/>`,
+   {diff:1},
+   `<path d="M170 0 V44" fill="none" stroke-width="4"/>`,
+   {diff:4},
+   {diff:2},
+   `<rect x="58" y="274" width="14" height="40" fill="#777"/><rect x="328" y="274" width="14" height="40" fill="#777"/>
+    <rect x="20" y="250" width="360" height="24" rx="12" fill="#555"/>` + [40,120,200,280,360].map(x=>`<circle cx="${x}" cy="262" r="7" fill="#A3ABBA" stroke-width="3"/>`).join(""),
+   `<ellipse cx="90" cy="238" rx="20" ry="12" fill="#FFD93B"/><circle cx="104" cy="222" r="10" fill="#FFD93B"/><path d="M113 220 L122 223 L113 226Z" fill="#FF9A2E" stroke-width="3"/>
+    <circle cx="300" cy="234" r="16" fill="#3D8BFF"/><path d="M284 234 H316" fill="none" stroke="#fff" stroke-width="5"/>`,
+   {diff:0},
+   {diff:3}
+ ], diffs:[
+   { x:200, y:236, r:24, // oyuncak araba
+     L:`<path d="M178 244 V234 L188 222 H210 L222 234 V244Z" fill="#FF4D4D"/><path d="M192 232 L196 226 H206 L212 232Z" fill="#BFE9FF" stroke-width="3"/>
+        <circle cx="188" cy="246" r="5" fill="#2a2a30" stroke-width="3"/><circle cx="212" cy="246" r="5" fill="#2a2a30" stroke-width="3"/>`, R:"" },
+   { x:70, y:96, r:34, // gösterge paneli
+     L:`<rect x="34" y="66" width="72" height="60" rx="6" fill="#C9CED9"/><path d="M48 98 A22 22 0 0 1 92 98Z" fill="#fff" stroke-width="4"/><path d="M70 98 L82 82" fill="none" stroke="#FF4D4D" stroke-width="4"/>
+        <circle cx="50" cy="114" r="5" fill="#3FC35A" stroke-width="3"/><circle cx="70" cy="114" r="5" fill="#FFD93B" stroke-width="3"/><circle cx="90" cy="114" r="5" fill="#FF4D4D" stroke-width="3"/>`, R:"" },
+   { x:300, y:140, r:50, zones:[[300,90,26],[300,176,28]], // robot kolu
+     L:`<path d="M300 0 V100 L300 160" fill="none" stroke-width="16"/><path d="M300 0 V100 L300 160" fill="none" stroke="#FF9A2E" stroke-width="9"/><circle cx="300" cy="100" r="10" fill="#777" stroke-width="4"/>
+        <path d="M288 168 Q284 186 292 196 M312 168 Q316 186 308 196" fill="none" stroke-width="7"/><rect x="286" y="156" width="28" height="14" rx="3" fill="#777" stroke-width="4"/>`, R:"" },
+   { x:340, y:336, r:30, // hediye kolisi
+     L:`<rect x="312" y="316" width="56" height="44" fill="#C98A4B"/><path d="M312 330 H368 M340 316 V360" fill="none" stroke="#FFD93B" stroke-width="6"/><path d="M312 316 L340 304 L368 316" fill="none" stroke-width="4"/>`, R:"" },
+   { x:170, y:58, r:26, // asılı lamba
+     L:`<path d="M146 66 Q148 42 170 42 Q192 42 194 66Z" fill="#FFD93B"/><circle cx="170" cy="70" r="6" fill="#fff" stroke-width="3"/>`,
+     R:`<path d="M146 66 Q148 42 170 42 Q192 42 194 66Z" fill="#3FC35A"/><circle cx="170" cy="70" r="6" fill="#fff" stroke-width="3"/>` }
+ ]},
+ /* ---------- Seviye 43: Sonbahar Parkı (4 fark) ---------- */
+ { name:"Sonbahar Parkı", layers:[
+   `<rect width="400" height="400" fill="#FFE6A8" stroke="none"/>`,
+   `<path d="M0 250 Q200 236 400 252 V400 H0Z" fill="#C8D96A"/>`,
+   `<rect x="40" y="110" width="30" height="150" fill="#8B5A2B"/>` + fluffy(55,90,52,40,10,"#FF9A2E") + `<circle cx="34" cy="80" r="6" fill="#FFD93B" stroke-width="3"/><circle cx="80" cy="100" r="6" fill="#FF4D4D" stroke-width="3"/>`,
+   {diff:1},
+   `<ellipse cx="320" cy="340" rx="72" ry="28" fill="#5CC8F0"/>`,
+   {diff:3},
+   `<rect x="146" y="290" width="10" height="34" fill="#555"/><rect x="244" y="290" width="10" height="34" fill="#555"/>
+    <rect x="140" y="278" width="120" height="14" rx="3" fill="#A0622D"/><rect x="140" y="262" width="120" height="12" rx="3" fill="#A0622D"/>
+    <path d="M150 262 V236 M250 262 V236" fill="none" stroke-width="6"/>`,
+   {diff:0},
+   `<path d="M70 330 Q44 318 52 290 Q60 276 70 290 Q62 304 78 318Z" fill="#C8763A"/>
+    <ellipse cx="86" cy="326" rx="12" ry="16" fill="#E08A45"/><circle cx="92" cy="306" r="10" fill="#E08A45"/><path d="M88 298 L86 288 L94 296Z" fill="#E08A45" stroke-width="3"/><circle cx="96" cy="305" r="2.2" fill="#222" stroke="none"/>`,
+   {diff:2},
+   `<path d="M180 340 Q186 332 192 340 Q186 348 180 340Z M210 360 Q216 352 222 360 Q216 368 210 360Z" fill="#FF4D4D" stroke-width="3"/>`
+ ], diffs:[
+   { x:200, y:240, r:30, zones:[[170,242,22],[230,242,22]], // bankın tahtası
+     L:`<rect x="140" y="236" width="120" height="12" rx="3" fill="#A0622D"/>`, R:"" },
+   { x:300, y:120, r:32, // sarı yaprak kümesi
+     L:[[290,104,-20],[314,122,30],[294,140,10]].map(([x,y,a])=>`<path d="M${x-12} ${y} Q${x} ${y-14} ${x+12} ${y} Q${x} ${y+14} ${x-12} ${y}Z" transform="rotate(${a} ${x} ${y})" fill="#FFD93B" stroke-width="4"/>`).join(""), R:"" },
+   { x:104, y:316, r:18, // palamut
+     L:`<ellipse cx="104" cy="320" rx="7" ry="9" fill="#C8763A" stroke-width="3"/><path d="M96 314 Q104 306 112 314Z" fill="#6B3A1E" stroke-width="3"/>`, R:"" },
+   { x:320, y:328, r:28, // ördek
+     L:`<ellipse cx="316" cy="336" rx="22" ry="12" fill="#fff"/><circle cx="334" cy="318" r="10" fill="#3FC35A"/><path d="M342 318 L352 321 L342 324Z" fill="#FF9A2E" stroke-width="3"/><circle cx="336" cy="316" r="2" fill="#222" stroke="none"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 44: Kutup Penguenleri (5 fark) ---------- */
+ { name:"Kutup Penguenleri", layers:[
+   `<rect width="400" height="400" fill="#2C3E8F" stroke="none"/>` + [[40,30],[190,30],[360,40],[130,170],[280,180]].map(([x,y])=>`<path d="${starPath(x,y,6)}" fill="#fff" stroke-width="3"/>`).join(""),
+   {diff:2},
+   `<path d="M0 250 Q200 232 400 252 V400 H0Z" fill="#fff"/>`,
+   `<path d="M20 262 A70 70 0 0 1 160 262Z" fill="#E8F7FF"/><path d="M30 236 H150 M50 212 H130 M60 236 V262 M120 236 V262 M80 212 V236 M100 190 V212" fill="none" stroke-width="3"/>`,
+   {diff:1},
+   {diff:3},
+   `<ellipse cx="364" cy="276" rx="28" ry="32" fill="#FFF8E7"/><circle cx="352" cy="232" r="13" fill="#FFF8E7"/><circle cx="352" cy="236" r="12" fill="#FFF8E7" stroke="none"/>
+    <circle cx="352" cy="224" r="20" fill="#FFF8E7"/>`,
+   `<circle cx="346" cy="220" r="3" fill="#222" stroke="none"/><circle cx="360" cy="220" r="3" fill="#222" stroke="none"/><ellipse cx="353" cy="230" rx="5" ry="3.5" fill="#222"/>
+    <ellipse cx="340" cy="270" rx="10" ry="16" transform="rotate(40 340 270)" fill="#FFF8E7"/>`,
+   {diff:4},
+   `<ellipse cx="200" cy="304" rx="42" ry="17" fill="#2a2a30"/><ellipse cx="196" cy="310" rx="32" ry="9" fill="#fff" stroke-width="3"/>
+    <path d="M160 300 L146 292 L148 310Z" fill="#2a2a30" stroke-width="3"/><circle cx="246" cy="296" r="16" fill="#2a2a30"/><circle cx="250" cy="294" r="7" fill="#fff" stroke="none"/><circle cx="252" cy="294" r="3" fill="#222" stroke="none"/>
+    <path d="M261 296 L272 300 L261 304Z" fill="#FF9A2E" stroke-width="3"/>`,
+   {diff:0}
+ ], diffs:[
+   { x:232, y:298, r:22, // penguenin atkısı
+     L:`<path d="M226 284 Q232 298 228 314 L236 316 Q242 298 234 282Z" fill="#FF4D4D" stroke-width="4"/><path d="M226 312 L214 326 L224 330 L234 316Z" fill="#FF4D4D" stroke-width="4"/>`, R:"" },
+   { x:90, y:244, r:22, // iglonun kapısı
+     L:`<path d="M70 262 V240 Q90 218 110 240 V262Z" fill="#2a2a30"/>`, R:"" },
+   { x:200, y:90, r:70, zones:[[80,82,36],[200,92,36],[320,96,36]], // kutup ışığı
+     L:`<path d="M0 80 Q100 40 200 80 Q300 120 400 70 V100 Q300 150 200 110 Q100 70 0 110Z" fill="#3FC35A" fill-opacity=".8" stroke-width="3"/>`, R:"" },
+   { x:316, y:344, r:30, // buzdaki delik
+     L:`<ellipse cx="316" cy="344" rx="34" ry="12" fill="#2F86F0"/>`, R:"" },
+   { x:312, y:274, r:40, zones:[[318,252,22],[296,300,24]], // balık tutan ayı (olta)
+     L:`<path d="M342 262 L296 236" fill="none" stroke-width="6"/><path d="M296 236 V338" fill="none" stroke-width="2"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 45: Bebek Odası & Beşik (4 fark) ---------- */
+ { name:"Bebek Odası & Beşik", layers:[
+   `<rect width="400" height="400" fill="#E7F0FF" stroke="none"/><rect x="0" y="300" width="400" height="100" fill="#F6D98B"/>`,
+   `<rect x="260" y="50" width="100" height="80" rx="8" fill="#BFE9FF"/><path d="M310 50 V130 M260 90 H360" fill="none" stroke-width="5"/>`,
+   {diff:0},
+   `<rect x="110" y="198" width="160" height="92" rx="6" fill="#FFF3DD"/>` + [130,150,170,190,210,230,250].map(x=>`<path d="M${x} 206 V284" fill="none" stroke="#C98A4B" stroke-width="5"/>`).join("") +
+   `<rect x="104" y="190" width="172" height="12" rx="5" fill="#C98A4B"/><rect x="104" y="282" width="172" height="12" rx="5" fill="#C98A4B"/>
+    <rect x="110" y="292" width="10" height="20" fill="#C98A4B"/><rect x="260" y="292" width="10" height="20" fill="#C98A4B"/>`,
+   {diff:3},
+   `<circle cx="42" cy="236" r="10" fill="#D9A066"/><circle cx="78" cy="236" r="10" fill="#D9A066"/>
+    <ellipse cx="60" cy="290" rx="28" ry="26" fill="#D9A066"/><circle cx="60" cy="250" r="22" fill="#D9A066"/><ellipse cx="60" cy="258" rx="9" ry="7" fill="#F6DDBB" stroke-width="3"/>
+    <circle cx="52" cy="246" r="2.6" fill="#222" stroke="none"/><circle cx="68" cy="246" r="2.6" fill="#222" stroke="none"/><ellipse cx="60" cy="256" rx="3" ry="2.2" fill="#222"/>`,
+   {diff:1},
+   `<rect x="310" y="236" width="70" height="70" rx="4" fill="#FF8FB8"/><path d="M310 270 H380" fill="none" stroke-width="3"/><circle cx="345" cy="254" r="3.5" fill="#222" stroke="none"/><circle cx="345" cy="288" r="3.5" fill="#222" stroke="none"/>`,
+   {diff:2}
+ ], diffs:[
+   { x:190, y:138, r:42, // beşik mobili
+     L:`<path d="M262 192 V110 H190 V118" fill="none" stroke-width="5"/><path d="M150 124 H230" fill="none" stroke-width="4"/>
+        <path d="M160 124 V138 M190 118 V148 M220 124 V138" fill="none" stroke-width="2"/>
+        <path d="${starPath(160,146,10)}" fill="#FFD93B" stroke-width="3"/><circle cx="190" cy="156" r="9" fill="#FF8FB8" stroke-width="3"/><path d="${starPath(220,146,10)}" fill="#7FD8FF" stroke-width="3"/>`, R:"" },
+   { x:60, y:272, r:20, // ayıcığın kurdelesi
+     L:`<path d="M60 272 L46 264 V280Z M60 272 L74 264 V280Z" fill="#FF4D4D" stroke-width="3"/><circle cx="60" cy="272" r="4" fill="#FF4D4D" stroke-width="3"/>`, R:"" },
+   { x:345, y:216, r:22, // biberon
+     L:`<path d="M339 202 Q345 188 351 202Z" fill="#FFE1BF" stroke-width="3"/><rect x="336" y="200" width="18" height="6" rx="2" fill="#7FD8FF" stroke-width="3"/><rect x="336" y="206" width="18" height="30" rx="5" fill="#fff" stroke-width="4"/>`, R:"" },
+   { x:200, y:346, r:62, zones:[[140,346,30],[200,346,30],[260,346,30]], // halının deseni
+     L:`<ellipse cx="200" cy="346" rx="120" ry="30" fill="#FF8FB8"/>` + [[140,346],[175,336],[200,354],[225,336],[260,346],[110,340],[290,340]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="6" fill="#fff" stroke="none"/>`).join(""),
+     R:`<ellipse cx="200" cy="346" rx="120" ry="30" fill="#FF8FB8"/><path d="M96 340 H304 M110 354 H290" fill="none" stroke="#fff" stroke-width="6"/>` }
+ ]},
+ /* ---------- Seviye 46: Trafik & Köprü Geçişi (5 fark) ---------- */
+ { name:"Trafik & Köprü Geçişi", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(200,40,.6),
+   `<rect x="0" y="270" width="400" height="130" fill="#2F86F0"/><path d="M40 300 Q55 292 70 300 M150 370 Q165 362 180 370" fill="none" stroke="#fff" stroke-width="4"/>`,
+   `<rect x="90" y="80" width="24" height="230" fill="#FF6B6B"/><rect x="290" y="80" width="24" height="230" fill="#FF6B6B"/>`,
+   [130,160,200,240,270].map(x=>`<path d="M${x} ${x===200?156:x===160||x===240?128:104} V220" fill="none" stroke="#777" stroke-width="3"/>`).join(""),
+   {diff:0},
+   `<rect x="0" y="218" width="400" height="26" fill="#555"/>` + [20,80,260,320].map(x=>`<rect x="${x}" y="229" width="30" height="5" fill="#fff" stroke="none"/>`).join(""),
+   {diff:3},
+   `<path d="M200 218 V196" fill="none" stroke-width="5"/>`,
+   {diff:2},
+   `<path d="M246 330 H354 L340 356 H260Z" fill="#fff"/><rect x="266" y="310" width="66" height="22" rx="4" fill="#FFD93B"/><rect x="292" y="292" width="14" height="20" fill="#FF4D4D"/>`,
+   {diff:1},
+   `<rect x="36" y="196" width="8" height="24" fill="#555"/>`,
+   {diff:4}
+ ], diffs:[
+   { x:200, y:132, r:66, zones:[[200,152,28],[150,132,26],[250,132,26],[45,134,24],[355,134,24]], // köprü halatı
+     L:cable("#FF4D4D"), R:cable("#3D8BFF") },
+   { x:312, y:272, r:22, // vapurun dumanı
+     L:`<circle cx="304" cy="282" r="7" fill="#C9CED9" stroke-width="3"/><circle cx="316" cy="268" r="9" fill="#C9CED9" stroke-width="3"/>`, R:"" },
+   { x:200, y:188, r:20, // köprü lambası
+     L:`<circle cx="200" cy="190" r="9" fill="#FFD93B" stroke-width="4"/>`, R:`<circle cx="200" cy="190" r="9" fill="#6b6b6b" stroke-width="4"/>` },
+   { x:155, y:231, r:20, // yol çizgisi
+     L:`<rect x="140" y="229" width="30" height="5" fill="#fff" stroke="none"/>`, R:"" },
+   { x:56, y:206, r:22, // bariyer
+     L:`<rect x="40" y="200" width="56" height="10" rx="3" fill="#fff" stroke-width="3"/><path d="M54 201 V209 M68 201 V209 M82 201 V209" fill="none" stroke="#FF4D4D" stroke-width="6" stroke-linecap="butt"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 47: Çiçek Serası (4 fark) ---------- */
+ { name:"Çiçek Serası", layers:[
+   `<rect width="400" height="400" fill="#E3F6E9" stroke="none"/><rect x="0" y="330" width="400" height="70" fill="#A0622D"/>`,
+   `<rect x="20" y="140" width="360" height="192" fill="#EFFBF3"/><path d="M110 140 V332 M200 140 V332 M290 140 V332" fill="none" stroke-width="4"/>`,
+   `<path d="M20 140 L200 40 L380 140Z" fill="#DFF6FF"/>`,
+   {diff:1},
+   `<path d="M200 40 L80 140 M200 40 L140 140 M200 40 V140 M200 40 L260 140 M200 40 L320 140" fill="none" stroke-width="4"/>`,
+   `<rect x="40" y="250" width="320" height="14" rx="3" fill="#A0622D"/><rect x="50" y="264" width="10" height="66" fill="#A0622D"/><rect x="340" y="264" width="10" height="66" fill="#A0622D"/>`,
+   `<path d="M72 250 L76 220 H104 L108 250Z M162 250 L166 220 H194 L198 250Z M262 250 L266 220 H294 L298 250Z" fill="#E07A4A"/>
+    <path d="M90 220 Q70 196 64 176 M90 220 Q90 190 92 168 M90 220 Q110 196 118 178" fill="none" stroke="#2E8B3E" stroke-width="8"/>
+    <path d="M180 220 V186" fill="none" stroke="#2E8B3E" stroke-width="6"/>
+    <path d="M162 190 Q160 160 170 156 L180 168 L190 156 Q200 160 198 190 Q180 204 162 190Z" fill="#FF4D4D"/>` +
+   `<rect x="268" y="176" width="24" height="46" rx="12" fill="#3FC35A"/><path d="M268 196 H256 V180 M292 200 H304 V186" fill="none" stroke-width="9"/><path d="M268 196 H256 V180 M292 200 H304 V186" fill="none" stroke="#3FC35A" stroke-width="4"/>`,
+   {diff:0},
+   {diff:2},
+   {diff:3}
+ ], diffs:[
+   { x:280, y:172, r:20, // kaktüs çiçeği
+     L:`<path d="${starPath(280,172,11,5)}" fill="#FF8FB8" stroke-width="3"/>`, R:"" },
+   { x:260, y:112, r:26, // cam tavan paneli
+     L:`<path d="M200 40 L260 140 L320 140Z" fill="#DFF6FF"/>`, R:`<path d="M200 40 L260 140 L320 140Z" fill="#B8F08A"/>` },
+   { x:100, y:346, r:30, // sulama hortumu
+     L:`<ellipse cx="96" cy="348" rx="26" ry="14" fill="none" stroke="#222" stroke-width="12"/><ellipse cx="96" cy="348" rx="26" ry="14" fill="none" stroke="#3FC35A" stroke-width="6"/>
+        <path d="M122 348 Q140 356 150 344" fill="none" stroke="#222" stroke-width="10"/><path d="M122 348 Q140 356 150 344" fill="none" stroke="#3FC35A" stroke-width="5"/><rect x="146" y="334" width="14" height="10" rx="2" fill="#FFD93B" stroke-width="3"/>`, R:"" },
+   { x:346, y:216, r:46, zones:[[334,180,26],[354,270,22]], // kelebek filesi
+     L:`<path d="M362 326 L338 196" fill="none" stroke-width="7"/><path d="M362 326 L338 196" fill="none" stroke="#C98A4B" stroke-width="3"/>
+        <ellipse cx="334" cy="180" rx="20" ry="18" fill="#fff" fill-opacity=".85" stroke-width="4"/><path d="M318 176 H350 M322 188 H346 M334 164 V196" fill="none" stroke="#A3ABBA" stroke-width="2"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 48: Korsan Gemisi Güvertesi (5 fark) ---------- */
+ { name:"Korsan Gemisi Güvertesi", layers:[
+   `<rect width="400" height="400" fill="#BFE9FF" stroke="none"/>` + cloud(80,50,.7),
+   `<rect x="193" y="30" width="14" height="240" fill="#8B5A2B"/>`,
+   {diff:1},
+   `<path d="M130 60 Q200 80 270 60 L262 170 Q200 186 138 170Z" fill="#FFF3DD"/><path d="M130 110 Q200 128 270 110" fill="none" stroke-width="3"/>`,
+   `<rect x="0" y="260" width="400" height="140" fill="#C98A4B"/><path d="M0 300 H400 M0 340 H400 M0 380 H400" fill="none" stroke-width="3"/>
+    <rect x="0" y="236" width="400" height="10" fill="#8B5A2B"/>` + [20,80,140,260,320,380].map(x=>`<rect x="${x-4}" y="244" width="8" height="18" fill="#8B5A2B" stroke-width="3"/>`).join(""),
+   {diff:0},
+   `<path d="M354 238 L352 246 M366 238 L368 246" fill="none" stroke="#FF9A2E" stroke-width="4"/>
+    <path d="M352 236 Q340 256 344 270 Q356 254 360 238Z" fill="#3D8BFF" stroke-width="4"/>
+    <ellipse cx="360" cy="220" rx="13" ry="18" fill="#FF4D4D"/><circle cx="362" cy="204" r="11" fill="#FF4D4D"/>
+    <path d="M370 202 Q382 206 374 216 L368 210Z" fill="#FFD93B" stroke-width="3"/><circle cx="364" cy="201" r="3" fill="#fff" stroke-width="2"/>`,
+   {diff:3},
+   {diff:2},
+   {diff:4}
+ ], diffs:[
+   { x:80, y:226, r:38, // dümen
+     L:`<circle cx="80" cy="226" r="28" fill="none" stroke="#222" stroke-width="13"/><circle cx="80" cy="226" r="28" fill="none" stroke="#A0622D" stroke-width="7"/>` +
+       [0,45,90,135].map(a=>{const c=Math.cos(a*RAD)*40, s=Math.sin(a*RAD)*40; return `<path d="M${r1(80-c)} ${r1(226-s)} L${r1(80+c)} ${r1(226+s)}" fill="none" stroke-width="6"/>`;}).join("") +
+       `<circle cx="80" cy="226" r="9" fill="#FFD93B" stroke-width="4"/>`, R:"" },
+   { x:222, y:40, r:22, // ana direk bayrağı
+     L:`<rect x="207" y="28" width="34" height="24" fill="#2a2a30" stroke-width="4"/><circle cx="224" cy="38" r="5" fill="#fff" stroke="none"/><path d="M217 47 L231 44 M217 44 L231 47" fill="none" stroke="#fff" stroke-width="3"/>`,
+     R:`<rect x="207" y="28" width="34" height="24" fill="#FF4D4D" stroke-width="4"/>` },
+   { x:300, y:306, r:32, // top mermisi kasası
+     L:`<rect x="270" y="298" width="60" height="36" rx="3" fill="#A0622D"/><path d="M270 312 H330" fill="none" stroke-width="3"/>
+        <circle cx="284" cy="290" r="10" fill="#2a2a30"/><circle cx="304" cy="288" r="10" fill="#2a2a30"/><circle cx="294" cy="274" r="10" fill="#2a2a30"/><circle cx="322" cy="292" r="9" fill="#2a2a30"/>`, R:"" },
+   { x:364, y:194, r:18, // papağanın tüyü
+     L:`<path d="M358 196 Q350 178 360 172 Q362 186 364 194 Q368 178 378 178 Q372 190 366 198Z" fill="#3FC35A" stroke-width="3"/>`, R:"" },
+   { x:140, y:304, r:32, // ahşap fıçı
+     L:`<path d="M114 276 Q108 306 114 336 H166 Q172 306 166 276Z" fill="#C8763A"/><path d="M112 290 H168 M112 322 H168" fill="none" stroke="#555" stroke-width="5"/><path d="M140 276 V336" fill="none" stroke-width="2"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 49: Gökkuşağı Krallığı (5 fark) ---------- */
+ { name:"Gökkuşağı Krallığı", layers:[
+   `<rect width="400" height="400" fill="#DCD0FF" stroke="none"/>`,
+   `<circle cx="60" cy="70" r="26" fill="#FFD93B"/><circle cx="52" cy="66" r="3" fill="#222" stroke="none"/><circle cx="68" cy="66" r="3" fill="#222" stroke="none"/><path d="M50 78 Q60 86 70 78" fill="none" stroke-width="3"/>`,
+   {diff:4},
+   [[140,"#FF4D4D"],[124,"#FFD93B"],[108,"#3FC35A"],[92,"#3D8BFF"]].map(([r,c])=>`<path d="M${200-r} 290 A${r} ${r} 0 0 1 ${200+r} 290" fill="none" stroke="#222" stroke-width="20"/><path d="M${200-r} 290 A${r} ${r} 0 0 1 ${200+r} 290" fill="none" stroke="${c}" stroke-width="12"/>`).join(""),
+   `<path d="M0 300 Q200 272 400 300 V400 H0Z" fill="#9BE15D"/>`,
+   fluffy(66,296,32,14,8,"#fff") + fluffy(334,296,32,14,8,"#fff"),
+   {diff:0},
+   {diff:1},
+   fluffy(320,96,46,18,9,"#fff"),
+   `<ellipse cx="168" cy="98" rx="30" ry="16" fill="#fff"/><path d="M148 110 L142 128 M160 112 L158 130 M180 112 L184 130 M190 108 L198 126" fill="none" stroke-width="5"/>
+    <path d="M190 92 Q196 70 210 66 L214 80 Q204 86 200 98Z" fill="#fff"/><ellipse cx="214" cy="66" rx="12" ry="9" fill="#fff"/><circle cx="216" cy="63" r="2.4" fill="#222" stroke="none"/>
+    <path d="M198 70 Q192 60 200 56 Q202 66 206 64" fill="#C78BFF" stroke-width="3"/><path d="M140 96 Q124 100 126 118 Q134 106 142 104Z" fill="#C78BFF" stroke-width="3"/>`,
+   {diff:2},
+   {diff:3}
+ ], diffs:[
+   { x:84, y:300, r:30, // altın küpü
+     L:`<ellipse cx="84" cy="286" rx="20" ry="7" fill="#FFD93B" stroke-width="4"/><circle cx="76" cy="282" r="6" fill="#FFD93B" stroke-width="3"/><circle cx="90" cy="280" r="6" fill="#FFD93B" stroke-width="3"/>
+        <path d="M62 290 Q60 320 84 322 Q108 320 106 290Z" fill="#2a2a30"/>`, R:"" },
+   { x:320, y:66, r:28, // buluttaki kale kulesi
+     L:`<rect x="304" y="50" width="32" height="40" fill="#FF8FB8"/><path d="M300 52 L320 24 L340 52Z" fill="#A45CFF"/><rect x="314" y="62" width="12" height="16" rx="6" fill="#2a2a30" stroke-width="3"/>`, R:"" },
+   { x:170, y:82, r:24, // pegasus kanadı
+     L:`<path d="M160 90 Q150 58 176 46 Q174 66 190 70 Q180 84 160 90Z" fill="#FF8FB8"/>`,
+     R:`<path d="M160 90 Q150 58 176 46 Q174 66 190 70 Q180 84 160 90Z" fill="#7FD8FF"/>` },
+   { x:200, y:224, r:32, // yıldız parıltısı
+     L:`<path d="${starPath(186,212,11)}" fill="#FFD93B" stroke-width="3"/><path d="${starPath(214,230,13)}" fill="#fff" stroke-width="3"/><path d="${starPath(194,244,8)}" fill="#FF8FB8" stroke-width="3"/>`, R:"" },
+   { x:60, y:38, r:22, // güneşin tacı
+     L:`<path d="M42 46 L44 26 L52 36 L60 22 L68 36 L76 26 L78 46Z" fill="#FF9A2E" stroke-width="4"/>`, R:"" }
+ ]},
+ /* ---------- Seviye 50: Büyük Panda Şampiyonluk Sahnesi (5 fark) ---------- */
+ { name:"Büyük Panda Şampiyonluk Sahnesi", layers:[
+   `<rect width="400" height="400" fill="#3B2A6B" stroke="none"/><path d="M80 0 L140 340 H20Z M320 0 L380 340 H260Z" fill="#FFE66D" fill-opacity=".18" stroke="none"/>
+    <rect x="0" y="336" width="400" height="64" fill="#A0622D"/>`,
+   {diff:1},
+   {diff:4},
+   `<rect x="50" y="280" width="100" height="58" fill="#C9CED9"/><rect x="250" y="300" width="100" height="38" fill="#E8A84A"/><rect x="150" y="250" width="100" height="88" fill="#FFD93B"/>
+    <path d="M90 296 Q100 288 110 296 Q110 306 90 322 H112 M290 312 Q300 306 310 312 Q312 318 300 320 Q312 322 310 330 Q300 336 290 330" fill="none" stroke="#fff" stroke-width="5"/>`,
+   {diff:2},
+   `<circle cx="176" cy="132" r="13" fill="#2a2a30"/><circle cx="224" cy="132" r="13" fill="#2a2a30"/>
+    <ellipse cx="200" cy="216" rx="36" ry="36" fill="#fff"/><ellipse cx="182" cy="246" rx="14" ry="10" fill="#2a2a30"/><ellipse cx="218" cy="246" rx="14" ry="10" fill="#2a2a30"/>
+    <ellipse cx="168" cy="176" rx="10" ry="22" transform="rotate(-30 168 176)" fill="#2a2a30"/><ellipse cx="232" cy="168" rx="10" ry="22" transform="rotate(30 232 168)" fill="#2a2a30"/>
+    <circle cx="200" cy="160" r="30" fill="#fff"/>
+    <ellipse cx="188" cy="158" rx="8" ry="11" transform="rotate(25 188 158)" fill="#2a2a30" stroke="none"/><ellipse cx="212" cy="158" rx="8" ry="11" transform="rotate(-25 212 158)" fill="#2a2a30" stroke="none"/>
+    <circle cx="189" cy="157" r="3" fill="#fff" stroke="none"/><circle cx="211" cy="157" r="3" fill="#fff" stroke="none"/>
+    <ellipse cx="200" cy="171" rx="5" ry="3.5" fill="#222"/><path d="M190 178 Q200 188 210 178" fill="none" stroke-width="3"/>`,
+   {diff:3},
+   {diff:0}
+ ], diffs:[
+   { x:244, y:126, r:28, // altın kupa
+     L:`<path d="M230 112 Q218 112 220 124 Q222 132 232 132 M258 112 Q270 112 268 124 Q266 132 256 132" fill="none" stroke-width="4"/>
+        <path d="M228 104 H260 Q260 136 244 140 Q228 136 228 104Z" fill="#FFD93B"/><rect x="240" y="140" width="8" height="10" fill="#FFD93B" stroke-width="3"/><rect x="232" y="150" width="24" height="8" rx="2" fill="#FFD93B" stroke-width="3"/>`, R:"" },
+   { x:80, y:92, r:42, // konfetiler
+     L:[[56,70,"#FF4D4D"],[84,62,"#3FC35A"],[106,84,"#FFD93B"],[70,100,"#3D8BFF"],[100,112,"#FF8FB8"],[52,120,"#FF9A2E"],[90,88,"#A45CFF"]].map(([x,y,c],i)=> i%2
+       ? `<circle cx="${x}" cy="${y}" r="6" fill="${c}" stroke-width="3"/>`
+       : `<rect x="${x-6}" y="${y-4}" width="12" height="8" rx="2" transform="rotate(${i*25} ${x} ${y})" fill="${c}" stroke-width="3"/>`).join(""), R:"" },
+   { x:200, y:292, r:28, // podyumdaki 1
+     L:`<path d="M188 274 L204 264 V318 M190 318 H218" fill="none" stroke="#fff" stroke-width="8"/>`, R:"" },
+   { x:200, y:214, r:22, // madalya kurdelesi
+     L:`<path d="M186 188 L200 212 L214 188" fill="none" stroke="#FF4D4D" stroke-width="7"/><circle cx="200" cy="218" r="10" fill="#FFD93B" stroke-width="4"/>`,
+     R:`<path d="M186 188 L200 212 L214 188" fill="none" stroke="#3D8BFF" stroke-width="7"/><circle cx="200" cy="218" r="10" fill="#FFD93B" stroke-width="4"/>` },
+   { x:340, y:110, r:32, // zafer balonu
+     L:`<path d="M340 142 Q332 170 344 200" fill="none" stroke="#fff" stroke-width="3"/><ellipse cx="340" cy="110" rx="26" ry="31" fill="#FF4D4D"/><path d="M334 140 L346 140 L340 148Z" fill="#FF4D4D" stroke-width="3"/><path d="${starPath(340,108,12)}" fill="#FFD93B" stroke-width="3"/>`, R:"" }
+ ]}
+];
+function digger(c){
+  return `<path d="M128 286 L178 240 L200 294" fill="none" stroke-width="17"/><path d="M128 286 L178 240 L200 294" fill="none" stroke="${c}" stroke-width="9"/>
+    <path d="M188 290 L216 292 L208 318 Q192 318 186 304Z" fill="${c}"/>
+    <rect x="58" y="258" width="72" height="66" rx="6" fill="${c}"/><rect x="70" y="268" width="38" height="28" rx="4" fill="#BFE9FF"/>`;
+}
+function cable(c){
+  const d = "M0 170 L102 86 Q200 220 302 86 L400 170";
+  return `<path d="${d}" fill="none" stroke="#222" stroke-width="13"/><path d="${d}" fill="none" stroke="${c}" stroke-width="6"/>`;
+}
+function tulip(x, y, c){
+  return `<path d="M${x} ${y} V${y+70}" fill="none" stroke-width="10"/><path d="M${x} ${y} V${y+70}" fill="none" stroke="#3FC35A" stroke-width="5"/>
+    <path d="M${x} ${y+50} Q${x-24} ${y+30} ${x-26} ${y+12} Q${x-6} ${y+24} ${x} ${y+50}Z" fill="#3FC35A" stroke-width="4"/>
+    <path d="M${x-18} ${y} Q${x-20} ${y-30} ${x-10} ${y-34} L${x} ${y-22} L${x+10} ${y-34} Q${x+20} ${y-30} ${x+18} ${y} Q${x} ${y+14} ${x-18} ${y}Z" fill="${c}"/>`;
+}
+function gearPath(cx, cy, R, r, n){ let d = "";
+  for (let i=0;i<n*4;i++){ const a=i/(n*4)*2*Math.PI, q=(i%4<2)?R:r; d += (i?"L":"M") + r1(cx+q*Math.cos(a)) + " " + r1(cy+q*Math.sin(a)); }
+  return d + "Z"; }
+function gull(up){
+  const w = up ? `<path d="M84 138 Q70 112 50 114 Q64 132 84 144Z M96 138 Q110 112 130 114 Q116 132 96 144Z" fill="#fff" stroke-width="4"/><path d="M50 114 Q56 118 60 124 M130 114 Q124 118 120 124" fill="none" stroke-width="4"/>`
+               : `<path d="M84 142 Q70 166 50 166 Q64 148 84 138Z M96 142 Q110 166 130 166 Q116 148 96 138Z" fill="#A3ABBA" stroke-width="4"/>`;
+  return w + `<ellipse cx="90" cy="142" rx="17" ry="9" fill="#fff" stroke-width="4"/><circle cx="104" cy="135" r="7" fill="#fff" stroke-width="4"/>
+    <path d="M110 134 L120 137 L110 140Z" fill="#FF9A2E" stroke-width="3"/><circle cx="105" cy="133" r="1.8" fill="#222" stroke="none"/>`;
+}
+function bar(x){
+  return `<rect x="${x}" y="224" width="50" height="26" rx="4" fill="#6B3A1E"/><path d="M${x+17} 226 V248 M${x+33} 226 V248 M${x+2} 237 H${x+48}" fill="none" stroke="#9B5A2E" stroke-width="3"/>`;
+}
+function valve(c){
+  return `<circle cx="110" cy="67" r="20" fill="none" stroke="#222" stroke-width="11"/><circle cx="110" cy="67" r="20" fill="none" stroke="${c}" stroke-width="5"/>
+    <path d="M91 67 H129 M110 48 V86" fill="none" stroke="#222" stroke-width="8"/><path d="M91 67 H129 M110 48 V86" fill="none" stroke="${c}" stroke-width="4"/><circle cx="110" cy="67" r="6" fill="${c}" stroke-width="3"/>`;
+}
+function slide(c){
+  const d = "M80 108 Q92 180 140 196 Q190 212 204 272";
+  return `<path d="${d}" fill="none" stroke="#222" stroke-width="36"/><path d="${d}" fill="none" stroke="${c}" stroke-width="26"/><path d="${d}" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="5"/>`;
+}
+function fence(c){
+  return `<rect x="240" y="236" width="158" height="10" fill="${c}"/><rect x="240" y="256" width="158" height="10" fill="${c}"/>` +
+    [248,290,332,374].map(x=>`<rect x="${x}" y="224" width="14" height="50" rx="4" fill="${c}"/>`).join("");
+}
+function tent(c, cd){
+  return `<path d="M170 130 V114" fill="none" stroke-width="5"/><path d="M50 300 L170 130 L290 300Z" fill="${c}"/>
+    <path d="M170 176 L130 300 H210Z" fill="${cd}"/><path d="M170 176 V300" fill="none" stroke-width="4"/>`;
+}
+function fish(c, fin){
+  return `<path d="M280 192 L342 140 Q330 192 342 244 Z" fill="${c}"/>
+    <path d="M168 146 Q208 96 252 146Z" fill="${fin}"/>
+    <path d="M190 240 Q210 278 236 242Z" fill="${fin}"/>
+    <ellipse cx="208" cy="195" rx="88" ry="58" fill="${c}"/>
+    <path d="M206 142 Q190 195 206 250 M246 148 Q234 195 246 242" fill="none" stroke="#fff" stroke-width="9"/>
+    <circle cx="152" cy="180" r="16" fill="#fff" stroke-width="4"/><circle cx="148" cy="181" r="8" fill="#222" stroke="none"/><circle cx="145" cy="178" r="2.5" fill="#fff" stroke="none"/>
+    <path d="M128 212 Q140 222 154 213" fill="none" stroke-width="4"/>`;
+}
+
+/* Seviye 1-50: hepsi özgün sahne (kopya yok). */
+function getLevel(n){
+  const i = n-1, sc = SCENES[i % SCENES.length], cycle = Math.floor(i / SCENES.length), mirror = cycle % 2 === 1;
+  return { n, name: sc.name, scene: sc, mirror, temp: n > SCENES.length,
+    diffs: sc.diffs.map(d => { const mx = x => mirror ? 400-x : x;
+      return {x: mx(d.x), y:d.y, r:d.r, zones:(d.zones || [[d.x,d.y,d.r]]).map(([x,y,r])=>[mx(x),y,r])}; }) };
+}
+
+/* ================= STORAGE ================= */
+let save = {last:1, done:[], purchased:false, sound:true, maxUnlockedLevel:1};
+try { const raw = localStorage.getItem(STORE_KEY); if (raw) save = Object.assign(save, JSON.parse(raw)); } catch(e){}
+save.maxUnlockedLevel = Math.min(TOTAL_LEVELS, Math.max(1, save.maxUnlockedLevel|0));
+save.last = Math.max(1, Math.min(save.last|0, save.maxUnlockedLevel));
+function persist(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch(e){} }
+const isPayLocked = n => n > FREE_LEVELS && !save.purchased;
+const isProgressLocked = n => n > save.maxUnlockedLevel;
+
+/* ================= AUDIO (Web Audio, dosyasız) ================= */
+let ac = null;
+function actx(){ if(!ac){ try{ ac = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(ac && ac.state==="suspended") ac.resume(); return ac; }
+function tone(f, dur, type, vol, delay, f2){
+  if (!save.sound) return; const a = actx(); if (!a) return;
+  const t = a.currentTime + (delay||0), o = a.createOscillator(), g = a.createGain();
+  o.type = type||"sine"; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t+dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol||0.25, t+0.015); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+dur+0.05);
+}
+const SFX = {
+  click(){ tone(700,.08,"triangle",.2); },
+  found(){ [784,988,1175,1568].forEach((f,i)=>tone(f,.22,"sine",.24,i*.07)); tone(2093,.3,"triangle",.07,.28); },
+  miss(){ tone(330,.12,"sine",.14,0,260); },
+  hint(){ tone(880,.15,"sine",.15); tone(1320,.2,"sine",.12,.12); },
+  win(){ [523,659,784,1047].forEach((f,i)=>tone(f,.25,"triangle",.25,i*.12)); tone(1319,.6,"sine",.2,.5); },
+  lock(){ tone(660,.12,"triangle",.18,0,600); tone(494,.22,"triangle",.16,.11,440); }
+};
+/* Arka plan: yumuşak çocuk ksilofonu döngüsü */
+const Music = (function(){
+  const SEMI = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  const f = n => 440 * Math.pow(2, ((parseInt(n.slice(-1),10)+1)*12 + SEMI[n[0]] - 69)/12);
+  const _ = null;
+  const MEL = [
+    "C5",_,"E5",_,"G5",_,"E5",_,   "A5",_,"G5",_,"E5",_,_,_,
+    "D5",_,"F5",_,"A5",_,"G5",_,   "E5",_,"D5",_,"C5",_,_,_,
+    "G5",_,"A5","G5","E5",_,"C5",_,"D5",_,"E5",_,"G5",_,_,_,
+    "A5",_,"G5",_,"E5",_,"D5",_,   "C5",_,"D5",_,"C5",_,_,_ ];
+  const BASS = ["C3","A2","F2","G2","C3","A2","F2","C3"];
+  const STEP = 0.3, VOL = 0.5;
+  let timer = null, master = null, step = 0, next = 0, unlocked = false;
+  function note(freq, t, vol, len){
+    const a = ac, g = a.createGain(), o1 = a.createOscillator(), o2 = a.createOscillator(), g2 = a.createGain();
+    o1.type = "sine"; o1.frequency.value = freq;
+    o2.type = "sine"; o2.frequency.value = freq*3; g2.gain.value = 0.22;   // ksilofon tınısı
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+0.004); g.gain.exponentialRampToValueAtTime(0.0001, t+len);
+    o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(master);
+    o1.start(t); o2.start(t); o1.stop(t+len+0.05); o2.stop(t+0.15);
+  }
+  function tick(){
+    while (next < ac.currentTime + 0.25){
+      const m = MEL[step % MEL.length];
+      if (m) note(f(m), next, 0.1, 0.55);
+      if (step % 8 === 0) note(f(BASS[Math.floor(step/8) % BASS.length]), next, 0.08, 0.9);
+      next += STEP; step++;
+    }
+  }
+  function start(){
+    if (!unlocked || !save.sound || timer || document.hidden) return;
+    const a = actx(); if (!a) return;
+    master = a.createGain(); master.gain.setValueAtTime(0.0001, a.currentTime);
+    master.gain.exponentialRampToValueAtTime(VOL, a.currentTime + 1.2); master.connect(a.destination);
+    next = a.currentTime + 0.15; timer = setInterval(tick, 60); tick();
+  }
+  function stop(){
+    if (timer){ clearInterval(timer); timer = null; }
+    if (master && ac){ const m = master; try{ m.gain.cancelScheduledValues(ac.currentTime); m.gain.setValueAtTime(m.gain.value, ac.currentTime); m.gain.linearRampToValueAtTime(0, ac.currentTime+0.25); }catch(e){} setTimeout(()=>{ try{ m.disconnect(); }catch(e){} }, 400); }
+    master = null;
+  }
+  function unlock(){ if (unlocked) return; unlocked = true; start(); }
+  document.addEventListener("visibilitychange", ()=>{ if (document.hidden) stop(); else start(); });
+  return {start, stop, unlock};
+})();
+["pointerdown","touchstart","keydown"].forEach(ev=>document.addEventListener(ev, ()=>{ actx(); Music.unlock(); }, {capture:true, passive:true}));
+
+function say(text){
+  if (!save.sound) return;
+  const TTS = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech;
+  if (TTS){ try{ TTS.stop().catch(()=>{}); TTS.speak({text, lang:"tr-TR", rate:0.95, pitch:1.3, volume:1.0, category:"ambient"}).catch(()=>{}); }catch(e){} return; }
+  if (!("speechSynthesis" in window)) return;
+  try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang="tr-TR"; u.rate=.95; u.pitch=1.3; speechSynthesis.speak(u);}catch(e){}
+}
+
+/* ================= ICONS ================= */
+const IC = {
+  home:'<svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10.5V20h4.5v-5h3v5H18v-9.5" fill="#fff"/></svg>',
+  back:'<svg viewBox="0 0 24 24"><path d="M10 5 4 11l6 6" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 11H14a6 6 0 0 1 6 6v2" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19.5 7" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  bulb:'<svg viewBox="0 0 24 24"><path d="M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.6.5.8 1 .8 1.7v.5h6v-.5c0-.7.2-1.2.8-1.7A6.5 6.5 0 0 0 12 2.5z" fill="#fff"/><rect x="9" y="17.5" width="6" height="2" rx="1" fill="#fff"/><rect x="10" y="20.5" width="4" height="1.8" rx=".9" fill="#fff"/></svg>',
+  son:'<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  soff:'<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16 9l5 6M21 9l-5 6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  unlock:'<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2.5" fill="#fff"/><path d="M8 10V7a4 4 0 0 1 8 0" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1.8" fill="#43b52c"/></svg>',
+  star:'<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.5l1.3-6.6L2.5 9.3l6.6-.8z" fill="#FFD93B" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  lockG:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#8a7a66" stroke="#fff" stroke-width="2"/><rect x="7.5" y="11" width="9" height="7" rx="1.5" fill="#fff"/><path d="M9.5 11V9a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="#fff" stroke-width="2"/></svg>',
+  lockS:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#ff8a1e" stroke="#fff" stroke-width="2"/><rect x="7.5" y="11" width="9" height="7" rx="1.5" fill="#fff"/><path d="M9.5 11V9a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="#fff" stroke-width="2"/></svg>'
+};
+const $ = id => document.getElementById(id);
+function setIcon(id, k){ $(id).innerHTML = IC[k]; }
+["gHome","lvHome"].forEach(i=>setIcon(i,"home"));
+setIcon("gBack","back"); setIcon("btnNext","check"); setIcon("lvUnlock","unlock");
+$("gHint").innerHTML = IC.bulb + '<span class="lbl">İpucu</span>';
+function refreshSound(){ ["mSound","gSound"].forEach(i=>{ setIcon(i, save.sound?"son":"soff"); $(i).classList.toggle("off",!save.sound); }); }
+refreshSound();
+
+/* Menü maskotları: stüdyo pandası + büyüteç */
+$("mascotA").innerHTML = $("studioLogo").innerHTML.replace('id="headClip"','id="headClip2"').replace("url(#headClip)","url(#headClip2)");
+$("mascotB").innerHTML = `<g stroke="#222" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M128 128 L182 182" stroke-width="22"/><path d="M128 128 L182 182" stroke="#ff8a1e" stroke-width="12"/>
+  <circle cx="88" cy="88" r="62" fill="#DFF6FF"/><circle cx="88" cy="88" r="62" fill="none" stroke="#ff4d6d" stroke-width="10"/>
+  <circle cx="88" cy="88" r="62" fill="none"/>
+  <path d="M56 70 Q64 52 84 46" fill="none" stroke="#fff" stroke-width="8"/>
+  <path d="${starPath(96,96,22,10)}" fill="#FFD93B" stroke-width="5"/></g>`;
+
+/* ================= SCREENS ================= */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id)); }
+function openOv(id){ $(id).classList.add("show"); }
+function closeOv(id){ $(id).classList.remove("show"); }
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>{ SFX.click(); closeOv(b.dataset.close); }));
+function tap(el, fn){ el.addEventListener("click", e=>{ actx(); fn(e); }); }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200); }
+function bubble(msg, small){ const b=$("bubble"); b.textContent=msg; b.classList.toggle("small",!!small); b.classList.add("show"); clearTimeout(b._h); b._h=setTimeout(()=>b.classList.remove("show"), 1500); }
+
+/* ---- Menu ---- */
+function renderMenu(){
+  $("playLbl").textContent = save.done.length ? "Devam Et (Seviye " + save.last + ")" : "Oyna";
+  show("menu");
+}
+tap($("btnPlay"), ()=>{ SFX.click(); startLevel(save.last); });
+tap($("btnLevels"), ()=>{ SFX.click(); renderLevels(); });
+tap($("mSound"), toggleSound); tap($("gSound"), toggleSound);
+function toggleSound(){ save.sound = !save.sound; persist(); refreshSound(); SFX.click();
+  if (save.sound) Music.start(); else { Music.stop(); if ("speechSynthesis" in window) speechSynthesis.cancel(); } }
+/* Gizlilik Politikası: şifresiz, doğrudan açılır */
+tap($("btnPrivacy"), ()=>{ SFX.click(); openOv("ovPolicy"); });
+/* İlerlemeyi sıfırla: SADECE seviyeler başa döner. purchased ve ses ayarı ASLA silinmez. */
+tap($("btnReset"), ()=>{ SFX.click(); parentGate(()=>{
+  save.maxUnlockedLevel = 1; save.last = 1; save.done = [];   // save.purchased'a dokunulmaz
+  persist(); toast("İlerleme sıfırlandı – Seviye 1"); renderMenu();
+}); });
+
+/* ---- Levels ---- */
+function renderLevels(){
+  const g = $("grid"); g.innerHTML = "";
+  for (let n=1;n<=TOTAL_LEVELS;n++){
+    const b = document.createElement("button"); b.className="lv"; b.textContent=n;
+    const prog = isProgressLocked(n), pay = !prog && isPayLocked(n);
+    if (save.done.includes(n)){ b.classList.add("done"); b.insertAdjacentHTML("beforeend", '<span class="star">'+IC.star+'</span>'); }
+    if (prog){ b.classList.add("lock"); b.insertAdjacentHTML("beforeend", '<span class="lk">'+IC.lockG+'</span>'); }
+    else if (pay){ b.classList.add("pay"); b.insertAdjacentHTML("beforeend", '<span class="lk">'+IC.lockS+'</span>'); }
+    if (n===save.last && !prog && !pay) b.classList.add("cur");
+    tap(b, ()=>{
+      if (prog){ SFX.lock(); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); }
+      else if (pay){ SFX.click(); requestUnlock(n); }
+      else { SFX.click(); startLevel(n); }
+    });
+    g.appendChild(b);
+  }
+  $("lvUnlock").style.visibility = save.purchased ? "hidden" : "visible";
+  show("levels");
+}
+tap($("lvHome"), ()=>{ SFX.click(); renderMenu(); });
+tap($("lvUnlock"), ()=>{ SFX.click(); requestUnlock(FREE_LEVELS+1); });
+
+/* ---- Game ---- */
+const NS = "http://www.w3.org/2000/svg";
+let cur = null, found = [], solved = false, svgs = [];
+function buildSceneSVG(level, side){
+  const sc = level.scene;
+  let body = sc.layers.map(l => typeof l === "string" ? l : sc.diffs[l.diff][side]).join("");
+  const g = `<g stroke="${K}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"${level.mirror ? ' transform="translate(400 0) scale(-1 1)"' : ""}>${body}</g>`;
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox","0 0 400 400");
+  svg.innerHTML = g + '<g class="marks"></g>';
+  return svg;
+}
+function startLevel(n){
+  n = Math.max(1, Math.min(TOTAL_LEVELS, n, save.maxUnlockedLevel));
+  if (isPayLocked(n)){ requestUnlock(n); return; }
+  cur = getLevel(n); found = []; solved = false;
+  save.last = n; persist();
+  $("lname").textContent = "Seviye " + n + " • " + cur.name;
+  fitName();
+  svgs = [];
+  [["frameL","L"],["frameR","R"]].forEach(([fid, side])=>{
+    const fr = $(fid); fr.innerHTML = ""; fr.classList.remove("solved");
+    const svg = buildSceneSVG(cur, side); fr.appendChild(svg); svgs.push(svg);
+    svg.addEventListener("pointerdown", e=>{ e.preventDefault(); actx(); onTap(svg, e); });
+  });
+  updateCounter(false);
+  $("btnNext").classList.remove("ready");
+  show("game");
+  setTimeout(()=>say("Farkları bul!"), 350);
+}
+/* Uzun seviye adları tek satıra sığsın diye yazı boyutu kademeli küçültülür */
+function fitName(){
+  const el = $("lname"); el.style.fontSize = "";
+  requestAnimationFrame(()=>{ let f = parseFloat(getComputedStyle(el).fontSize), k = 0;
+    while (el.scrollWidth > el.clientWidth && k++ < 12){ f *= 0.92; el.style.fontSize = f + "px"; } });
+}
+addEventListener("resize", ()=>{ if ($("game").classList.contains("active")) fitName(); });
+function toSvg(svg, e){
+  const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function onTap(svg, e){
+  if (solved) return;
+  const p = toSvg(svg, e);
+  let best = -1, bestD = 1e9;
+  /* Her farkın bir veya birkaç dokunma bölgesi olabilir; iç içe bölgelerde küçük nesne öncelikli (normalize mesafe). */
+  cur.diffs.forEach((d,i)=>{ if (found.includes(i)) return;
+    d.zones.forEach(([zx,zy,zr])=>{ const dist = Math.hypot(p.x-zx, p.y-zy);
+      if (dist <= zr + TAP_TOLERANCE){ const sc = dist / zr; if (sc < bestD){ bestD = sc; best = i; } } }); });
+  if (best < 0){ missFx(svg, p); SFX.miss(); return; }
+  found.push(best);
+  const d = cur.diffs[best];
+  svgs.forEach(s => drawMark(s, d));
+  SFX.found(); sparkle(e.clientX, e.clientY, 6);
+  updateCounter(true);
+  if (found.length === cur.diffs.length) setTimeout(levelSolved, 500);
+  else bubble(["Süper!","Buldun!","Aferin!","Harika!"][found.length % 4], true);
+}
+function drawMark(svg, d){
+  const m = svg.querySelector(".marks"), g = document.createElementNS(NS,"g");
+  g.setAttribute("class","mark");
+  g.innerHTML = `<circle cx="${d.x}" cy="${d.y}" r="${d.r}" fill="rgba(255,138,30,.12)" stroke="#fff" stroke-width="13"/>
+                 <circle cx="${d.x}" cy="${d.y}" r="${d.r}" fill="none" stroke="#FF5A1F" stroke-width="7"/>`;
+  m.appendChild(g);
+}
+function missFx(svg, p){
+  const c = document.createElementNS(NS,"circle");
+  c.setAttribute("cx",p.x); c.setAttribute("cy",p.y); c.setAttribute("r",22);
+  c.setAttribute("fill","rgba(255,255,255,.55)"); c.setAttribute("stroke","#fff"); c.setAttribute("stroke-width",4);
+  c.setAttribute("class","miss"); svg.querySelector(".marks").appendChild(c);
+  setTimeout(()=>c.remove(), 650);
+}
+function updateCounter(bump){
+  const c = $("cnt"); c.innerHTML = 'Farklar: <b>' + found.length + '</b> / ' + cur.diffs.length;
+  if (bump){ c.classList.remove("bump"); void c.offsetWidth; c.classList.add("bump"); }
+}
+function levelSolved(){
+  solved = true;
+  const n = cur.n;
+  if (!save.done.includes(n)) save.done.push(n);
+  save.maxUnlockedLevel = Math.max(save.maxUnlockedLevel, Math.min(TOTAL_LEVELS, n+1));
+  save.last = Math.min(TOTAL_LEVELS, n+1); persist();
+  SFX.win(); confetti(); starShower();
+  ["frameL","frameR"].forEach(f=>$(f).classList.add("solved"));
+  $("btnNext").classList.add("ready");
+  bubble(n >= TOTAL_LEVELS ? "Şampiyon!" : "Harika! Hepsini buldun!");
+  say(n >= TOTAL_LEVELS ? "Tebrikler şampiyon! Bütün farkları buldun!" : "Harika! Hepsini buldun!");
+}
+tap($("btnNext"), ()=>{
+  if (!solved){ SFX.lock(); const b=$("btnNext"); b.classList.remove("nudge"); void b.offsetWidth; b.classList.add("nudge"); setTimeout(()=>b.classList.remove("nudge"),500); bubble("Önce farkları bul!", true); return; }
+  SFX.click();
+  if (cur.n >= TOTAL_LEVELS){ renderLevels(); return; }
+  const nx = cur.n + 1;
+  if (isPayLocked(nx)) requestUnlock(nx); else startLevel(nx);
+});
+tap($("gHint"), ()=>{
+  if (solved) return;
+  const i = cur.diffs.findIndex((d,k)=>!found.includes(k)); if (i<0) return;
+  const d = cur.diffs[i]; SFX.hint();
+  svgs.forEach(svg=>{
+    const c = document.createElementNS(NS,"circle");
+    c.setAttribute("cx",d.x); c.setAttribute("cy",d.y); c.setAttribute("r",d.r+6);
+    c.setAttribute("fill","rgba(255,217,59,.25)"); c.setAttribute("stroke","#FFD93B"); c.setAttribute("stroke-width",6); c.setAttribute("stroke-dasharray","14 10");
+    c.setAttribute("class","hintc"); svg.querySelector(".marks").appendChild(c); setTimeout(()=>c.remove(), 2200);
+  });
+});
+tap($("gHelp"), ()=>{ SFX.click(); bubble("İki resmi karşılaştır, farka dokun!", true); say("İki resme dikkatlice bak. Farklı olan yere dokun!"); });
+tap($("gHome"), ()=>{ SFX.click(); renderMenu(); });
+tap($("gBack"), ()=>{ SFX.click(); renderLevels(); });
+
+/* ================= PARENTAL GATE ================= */
+let gateCb = null, gateAns = 0, gateVal = "";
+(function buildPad(){
+  const pad = $("gatePad");
+  ["1","2","3","4","5","6","7","8","9","0","⌫","OK"].forEach(k=>{
+    const b = document.createElement("button"); b.textContent = k;
+    if (k==="OK") b.className="ok"; if (k==="⌫") b.className="del";
+    tap(b, ()=>{
+      SFX.click();
+      if (k==="⌫") gateVal = gateVal.slice(0,-1);
+      else if (k==="OK") return checkGate();
+      else if (gateVal.length<3) gateVal += k;
+      $("gateIn").textContent = gateVal;
+    });
+    pad.appendChild(b);
+  });
+})();
+function parentGate(cb){
+  gateCb = cb; gateVal = ""; $("gateIn").textContent = "";
+  const a = 3 + Math.floor(Math.random()*7), b = 2 + Math.floor(Math.random()*8);
+  const useMul = Math.random()<.5;
+  gateAns = useMul ? a*b : a+b+10;
+  $("gateQ").textContent = useMul ? (a + " × " + b + " = ?") : (a + " + " + (b+10) + " = ?");
+  openOv("ovGate");
+}
+function checkGate(){
+  if (parseInt(gateVal,10) === gateAns){ closeOv("ovGate"); const cb = gateCb; gateCb = null; cb && cb(); }
+  else { const g=$("gateIn"); g.classList.remove("err"); void g.offsetWidth; g.classList.add("err"); SFX.lock(); const cb = gateCb; setTimeout(()=>parentGate(cb), 450); }
+}
+
+/* ================= PAYWALL / IAP ================= */
+/* Akış: Seviye 11+ → Ebeveyn Onayı (matematik) → "Tüm Seviyeleri Aç - 24.99 TL" ekranı */
+let payTarget = FREE_LEVELS+1;
+function requestUnlock(n){ payTarget = n; parentGate(()=>{ $("btnBuy").textContent = "Tüm Seviyeleri Aç - " + PRICE; openOv("ovPay"); }); }
+tap($("btnBuy"), ()=>{ SFX.click(); purchaseFullGame(false); });
+tap($("btnRestore"), ()=>{ SFX.click(); purchaseFullGame(true); });
+/* Capacitor/Play Billing bağlandığında window.PandaBilling.buy/restore("unlock_all_levels") → Promise<boolean>.
+   Yoksa (tarayıcı prototipi) satın alma simüle edilir. */
+function purchaseFullGame(restore){
+  const ok = () => { save.purchased = true; persist(); closeOv("ovPay"); SFX.win(); confetti(); toast("Tüm seviyeler açıldı!");
+    if (payTarget <= save.maxUnlockedLevel) startLevel(payTarget); else renderLevels(); };
+  const B = window.PandaBilling, fn = restore ? "restore" : "buy";
+  if (B && typeof B[fn]==="function"){
+    B[fn]("unlock_all_levels").then(r=>{ if(r) ok(); else toast("İşlem tamamlanmadı"); }).catch(()=>toast("İşlem tamamlanmadı"));
+  } else ok();
+}
+
+/* ================= CONFETTI + STARS ================= */
+function confetti(){
+  const cv = $("confetti"), ctx = cv.getContext("2d");
+  cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ["#FF4D4D","#3D8BFF","#FFD93B","#3FC35A","#FF9A2E","#A45CFF","#FF8FB8","#7FD8FF"];
+  const P = Array.from({length:150},()=>({x:cv.width/2+(Math.random()-.5)*cv.width*.5,y:cv.height*.5,vx:(Math.random()-.5)*18,vy:-Math.random()*17-6,
+    s:6+Math.random()*9,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[Math.floor(Math.random()*cols.length)],sh:Math.random()<.5}));
+  let f = 0;
+  (function loop(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    P.forEach(p=>{ p.vy+=.45; p.vx*=.99; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c;
+      if (p.sh){ ctx.beginPath(); ctx.arc(0,0,p.s/2,0,7); ctx.fill(); } else ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);
+      ctx.restore(); });
+    if (++f < 160) requestAnimationFrame(loop); else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+function flyStar(x, y, dx, dy, scale, delay, dur){
+  const s = document.createElement("div"); s.className = "fly"; s.innerHTML = IC.star;
+  s.style.left = x + "px"; s.style.top = y + "px"; document.body.appendChild(s);
+  const a = s.animate([
+    {transform:"translate(-50%,-50%) scale(0) rotate(0deg)", opacity:1},
+    {transform:`translate(calc(-50% + ${dx*.6}px), calc(-50% + ${dy*.6}px)) scale(${scale}) rotate(180deg)`, opacity:1, offset:.6},
+    {transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale*.6}) rotate(300deg)`, opacity:0}
+  ], {duration:dur, delay, easing:"cubic-bezier(.2,.8,.3,1)", fill:"both"});
+  a.onfinish = () => s.remove();
+}
+function sparkle(x, y, n){ for (let i=0;i<n;i++){ const a = i/n*Math.PI*2; flyStar(x, y, Math.cos(a)*80, Math.sin(a)*80, .7, 0, 650); } }
+function starShower(){
+  const W = innerWidth, H = innerHeight;
+  for (let i=0;i<22;i++){
+    const x = W*(.15 + Math.random()*.7), y = H*(.35 + Math.random()*.4);
+    flyStar(x, y, (Math.random()-.5)*W*.35, -(80 + Math.random()*H*.35), 1 + Math.random()*1.2, i*55, 1300);
+  }
+}
+
+/* ================= BOOT ================= */
+document.addEventListener("contextmenu", e=>e.preventDefault());
+document.addEventListener("gesturestart", e=>e.preventDefault());
+setTimeout(()=>{ $("splash").style.transition="opacity .5s"; $("splash").style.opacity="0";
+  setTimeout(()=>{ $("splash").style.opacity=""; renderMenu(); }, 500); }, 2700);
+})();
+</script>
+</body>
+</html>
